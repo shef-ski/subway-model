@@ -11,3 +11,5 @@ line_u4.add_train()
 
 simulation.add_line(line_u4)
 
+simulation.run(2000)  # duration in seconds
+

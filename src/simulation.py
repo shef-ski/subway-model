@@ -14,13 +14,12 @@ class Simulation:
     def add_line(self, line: SubwayLine):
         self.lines.append(line)
 
-    def step(self):
+    def _step(self):
         """Advances the simulation by one time step (1 minute)."""
-        print(f"\n--- Minute {self.current_time} ---")
+        print(f"\n--- Second {self.current_time} ---")
 
         for line in self.lines:
-            for train in line.trains:
-                train.update(self.current_time)
+            line.update(self.current_time)
 
         # Update other components (e.g., passenger arrivals at stations) later
 
@@ -29,9 +28,9 @@ class Simulation:
 
     def run(self, duration: int):
         """Runs the simulation for a given duration in minutes."""
-        print(f"=== Starting Simulation (Duration: {duration} minutes) ===")
-        print(f"Travel time between stations: {TRAVEL_TIME_BETWEEN_STATIONS} min")
-        print(f"Dwell time at stations: {DWELL_TIME_AT_STATION} min")
+        print(f"=== Starting Simulation (Duration: {round(duration/60)} minutes) ===")
+        print(f"Travel time between stations: {TRAVEL_TIME_BETWEEN_STATIONS} seconds")
+        print(f"Dwell time at stations: {DWELL_TIME_AT_STATION} seconds")
         for _ in range(duration):
-            self.step()
+            self._step()
         print(f"\n=== Simulation Finished at Minute {self.current_time - 1} ===")

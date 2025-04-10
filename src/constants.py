@@ -1,12 +1,14 @@
 import enum
 
+# Units in seconds
 
-TRAVEL_TIME_BETWEEN_STATIONS = 1
-DWELL_TIME_AT_STATION = 1  # minutes (time spent stopped at a station)
+TRAVEL_TIME_BETWEEN_STATIONS = 85
+DWELL_TIME_AT_STATION = 40  # time spent stopped at a station
 
 
 class TrainState(enum.Enum):
-    """Just for a cleaner representation than using strings."""
-    AT_STATION = 1
-    EN_ROUTE = 2
+    """For a cleaner representation than using strings."""
+    IN_QUEUE = 1
+    AT_STATION = 2
+    EN_ROUTE = 3
 
