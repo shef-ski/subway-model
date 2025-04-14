@@ -1,4 +1,7 @@
+import typing
+
 from src.constants import TrainState, DWELL_TIME_AT_STATION, TRAVEL_TIME_BETWEEN_STATIONS
+from src.subway.station import Station
 
 
 class Train:
@@ -6,64 +9,75 @@ class Train:
     capacity = 500  # quick assumption, do more research on train capacity
 
     def __init__(self,
-                 train_id: int,
-                 highest_station_id: int):
+                 train_id: int):
+
         self.id = train_id
-
-        # A train travels back and forth between the station with highest and lowest id (they are sorted)
-        self.current_station_id = 1
-        self.highest_station_id = highest_station_id
-
+        self.current_station: typing.Optional[Station] = None
         self.n_passengers = 0
+
         self.state = TrainState.IN_QUEUE
 
+        # Travel information
         # Direction is either 1 or -1
         # If 1, the station id is increasing, else decreasing to represent the travel direction ('up' vs 'down')
         self.direction = 1
-
-        # Travel information
-        self.next_station_id = None  # Update via: self.current_station_id + self.direction
+        self.next_station = None
+        self.prev_station = None
 
         # Time information
-        self.arrival_time = None  # int (total seconds)
-        self.ready_to_depart_at = None  # int (total seconds)
+        self.arrival_time = None  # int (total seconds) - relevant when state == EN_ROUTE
+        self.ready_to_depart_at = None  # int (total seconds) - relevant when state == AT_STATION
+        self.previous_departure_time = None
 
-    def update(self, current_time):
+    def __repr__(self):
+        return f"Train {self.id}"
+
+    def update(self, current_time: int, stations_list: list):
         # Train is currently queued and waiting to be deployed
         if self.state == TrainState.IN_QUEUE:
-            return
+            return  # do nothing
 
         # Train is currently at a station
         if self.state == TrainState.AT_STATION:
+            if self.ready_to_depart_at is None:  # Train just arrived / was deployed
+                # todo the dwell time should not be a constant but a r.v.
+                # todo passenger exchange
 
-            if self.ready_to_depart_at is None:  # in case it just arrived
                 self.ready_to_depart_at = current_time + DWELL_TIME_AT_STATION
-                self.next_station_id = self.current_station_id + self.direction
+
+                self.next_station = self._get_next_station(stations_list)
 
             if current_time >= self.ready_to_depart_at:  # Depart towards the next station
-
-                print(f"Minute {current_time/60}: {self.id} departing from {self.current_station_id}"
-                      f"towards Station {self.next_station_id}")
+                print(f"Minute {current_time/60}: {self.id} departing from {self.current_station.id}"
+                      f"towards Station {self.next_station.id}")
                 self.state = TrainState.EN_ROUTE
                 self.arrival_time = current_time + TRAVEL_TIME_BETWEEN_STATIONS
-                self.current_station_id = None  # No longer "at" the previous station
+
+                self.prev_station = self.current_station
+                self.current_station = None  # No longer "at" the previous station
+
+                self.previous_departure_time = self.ready_to_depart_at  # for viz
+
                 self.ready_to_depart_at = None  # Clear departure readiness
 
         # Train is currently traveling to the next station
         if self.state == TrainState.EN_ROUTE:
 
-            if current_time >= self.arrival_time:  # Train arrived at destination
-                print(f"Minute {current_time/60}: {self.id} arrived at Station {self.next_station_id}")
-                self.current_station_id = self.next_station_id
+            if current_time >= self.arrival_time:  # Train arrived at a station
+                print(f"Minute {current_time/60}: {self.id} arrived at Station {self.next_station.id}")
+                self.current_station = self.next_station
+                self.next_station = None
                 self.state = TrainState.AT_STATION
-                self.next_station_id = None
                 self.arrival_time = None
-                self.ready_to_depart_at = current_time + DWELL_TIME_AT_STATION  # Set departure time
 
-                # Check if we need to reverse direction because end station reached
-                if self.current_station_id in [1, self.highest_station_id]:
-                    print(f"Minute {current_time/60}: {self.id} reached end station, reversing direction.")
+                # Reverse directions if arrived end station
+                if self.current_station.is_end:
+                    print(f"Minute {current_time / 60}: {self.id} arrived at end station, reversing direction.")
                     self.direction *= -1
+
+    def _get_next_station(self, stations_list: list):
+        current_station_index = self.current_station.id - 1
+        return stations_list[current_station_index + self.direction]
 
     @property
     def pct_utilized(self):
@@ -90,6 +104,8 @@ class Train:
         # return how many people entered the train (useful for
         return n_entered
 
-
+    def set_station(self, new_station: Station):
+        self.current_station = new_station
+        self.state = TrainState.AT_STATION
 
 

@@ -1,15 +1,23 @@
 from src.simulation import Simulation
 from src.subway.subway_line import SubwayLine
+from visualization import animate_simulation
 
-simulation = Simulation()
+# Create a simulation
+sim = Simulation()
 
 # Create a subway line and add some initial trains
-line_u4 = SubwayLine("U4", 5)
-line_u4.add_train()
-line_u4.add_train()
+line = SubwayLine("U4", 5)
+line.add_train()
+line.add_train()
+
+# Add the line to the simulation
+sim.add_line(line)
+
+# Run with matplotlib visualization
+SIMULATION_DURATION_SECONDS = 2000  # Total simulation time
+ANIMATION_INTERVAL_MS = 20  # Visualization speed
+
+animate_simulation(sim, SIMULATION_DURATION_SECONDS, ANIMATION_INTERVAL_MS)
 
 
-simulation.add_line(line_u4)
-
-simulation.run(2000)  # duration in seconds
 
