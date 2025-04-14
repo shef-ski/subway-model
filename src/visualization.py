@@ -23,6 +23,7 @@ def animate_simulation(sim: Simulation,
     # Initialize plot elements for trains using placeholder data (0,0)
     train_markers = [ax.plot(0, 0, 's', markersize=10, label=f'{t.id}')[0] for t in line.trains]
     train_texts = [ax.text(0, 0, f' {t.id}', va='center', fontsize=9) for t in line.trains]
+    train_passengers = [ax.text(0, 0, f' {t.n_passengers}', va='center', fontsize=9) for t in line.trains]
 
     # --- Update function ---
     def update(frames):
@@ -38,7 +39,7 @@ def animate_simulation(sim: Simulation,
         for i, train in enumerate(line.trains):
             x_pos = None
             # y position with some space for individual trains and based on right-side traffic
-            y_pos = 0.06 * train * train.direction * -1
+            y_pos = 0.08 * train.id * train.direction * -1
 
             if train.state == TrainState.AT_STATION:
                 x_pos = train.current_station.id
@@ -51,9 +52,11 @@ def animate_simulation(sim: Simulation,
                 x_pos = start_station_pos + (end_station_pos - start_station_pos) * travel_progress
             if x_pos is not None:
                 train_markers[i].set_data([x_pos], [y_pos])
-                train_texts[i].set_position((x_pos+0.02, y_pos))  # Position text next to marker
+                train_texts[i].set_position((x_pos+0.03, y_pos))  # Position text next to marker
+                train_passengers[i].set_position((x_pos - 0.14, y_pos))  # Position text next to marker
                 updates.append(train_markers[i])
                 updates.append(train_texts[i])
+                updates.append(train_passengers[i])
 
         # Update time text
         time_text.set_text(f'Time: {sim.current_time - 1} s')  # Display time at end of step

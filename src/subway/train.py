@@ -2,6 +2,7 @@ import typing
 
 from src.constants import TrainState, DWELL_TIME_AT_STATION, TRAVEL_TIME_BETWEEN_STATIONS
 from src.subway.station import Station
+from utils import to_min_sec
 
 
 class Train:
@@ -13,7 +14,8 @@ class Train:
 
         self.id = train_id
         self.current_station: typing.Optional[Station] = None
-        self.n_passengers = 0
+
+        self.n_passengers = 42  # should be dynamic
 
         self.state = TrainState.IN_QUEUE
 
@@ -48,8 +50,8 @@ class Train:
                 self.next_station = self._get_next_station(stations_list)
 
             if current_time >= self.ready_to_depart_at:  # Depart towards the next station
-                print(f"Minute {current_time/60}: {self.id} departing from {self.current_station.id}"
-                      f"towards Station {self.next_station.id}")
+                print(f"{to_min_sec(current_time)} - T{self.id} departing from S{self.current_station.id} "
+                      f"towards S{self.next_station.id}")
                 self.state = TrainState.EN_ROUTE
                 self.arrival_time = current_time + TRAVEL_TIME_BETWEEN_STATIONS
 
@@ -64,7 +66,7 @@ class Train:
         if self.state == TrainState.EN_ROUTE:
 
             if current_time >= self.arrival_time:  # Train arrived at a station
-                print(f"Minute {current_time/60}: {self.id} arrived at Station {self.next_station.id}")
+                print(f"{to_min_sec(current_time)} - T{self.id} arrived at S{self.next_station.id}")
                 self.current_station = self.next_station
                 self.next_station = None
                 self.state = TrainState.AT_STATION
@@ -72,7 +74,7 @@ class Train:
 
                 # Reverse directions if arrived end station
                 if self.current_station.is_end:
-                    print(f"Minute {current_time / 60}: {self.id} arrived at end station, reversing direction.")
+                    print(f"{to_min_sec(current_time)} - T{self.id} arrived at end station, reversing direction.")
                     self.direction *= -1
 
     def _get_next_station(self, stations_list: list):

@@ -20,4 +20,3 @@ ANIMATION_INTERVAL_MS = 20  # Visualization speed
 animate_simulation(sim, SIMULATION_DURATION_SECONDS, ANIMATION_INTERVAL_MS)
 
 
-

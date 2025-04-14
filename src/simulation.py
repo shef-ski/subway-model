@@ -24,10 +24,6 @@ class Simulation:
         self.current_time += 1
 
     def run(self, duration: int):
-        """Runs the simulation for a given duration in minutes (without visualization!)"""
-        print(f"=== Starting Simulation (Duration: {round(duration/60)} minutes) ===")
-        print(f"Travel time between stations: {TRAVEL_TIME_BETWEEN_STATIONS} seconds")
-        print(f"Dwell time at stations: {DWELL_TIME_AT_STATION} seconds")
+        """Runs the simulation without visualization."""
         for _ in range(duration):
             self.step()
-        print(f"\n=== Simulation Finished at Minute {self.current_time - 1} ===")
