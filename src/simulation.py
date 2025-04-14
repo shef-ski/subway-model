@@ -18,7 +18,9 @@ class Simulation:
         for line in self.lines:
             line.update(self.current_time)
 
-        # todo Update other components (e.g., passenger arrivals at stations)
+            for station in line.stations:
+                station.random_psg_arrival()
+
 
         # Increment time for the next step
         self.current_time += 1

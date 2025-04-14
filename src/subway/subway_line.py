@@ -39,7 +39,7 @@ class SubwayLine:
             self.train_queue.append(new_train)
         else:
             if self._first_station_is_available():
-                new_train.set_station(self.first_station)
+                new_train.set_current_station(self.first_station)
             else:
                 self.train_queue.append(new_train)
 
@@ -48,7 +48,7 @@ class SubwayLine:
 
         if self.train_queue and self._first_station_is_available():
             deployed_train = self.train_queue.pop(0)
-            deployed_train.set_station(self.first_station)
+            deployed_train.set_current_station(self.first_station)
 
         for train in self.trains:
             train.update(current_time, self.stations)

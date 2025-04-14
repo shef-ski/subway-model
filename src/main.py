@@ -1,6 +1,6 @@
 from src.simulation import Simulation
 from src.subway.subway_line import SubwayLine
-from visualization import animate_simulation
+from animation import animate_simulation
 
 # Create a simulation
 sim = Simulation()
