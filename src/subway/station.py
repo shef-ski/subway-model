@@ -18,10 +18,18 @@ class Station:
         return f"Station {self.id}"
 
     def random_psg_arrival(self):
-        # Increment by either 0 or 1
-        self.psg_waiting_up += np.random.binomial(1, self.p_arrival_in_a_second)
+        """Increment the number of passengers waiting at a station using a random number."""
 
-        self.psg_waiting_down += np.random.binomial(1, self.p_arrival_in_a_second)
+        # Ensure the first and last stations only have passengers waiting in one direction
+        if self.is_end and self.id == 1:  # first station
+            self.psg_waiting_up += np.random.binomial(1, self.p_arrival_in_a_second)
+        elif self.is_end:  # last station
+            self.psg_waiting_down += np.random.binomial(1, self.p_arrival_in_a_second)
+
+        # Regular, non-end stations
+        else:
+            self.psg_waiting_up += np.random.binomial(1, self.p_arrival_in_a_second)
+            self.psg_waiting_down += np.random.binomial(1, self.p_arrival_in_a_second)
 
     def get_waiting_psg(self, direction: int):
         if direction == 1:

@@ -2,7 +2,7 @@ import typing
 
 from src.constants import TrainState, DWELL_TIME_AT_STATION, TRAVEL_TIME_BETWEEN_STATIONS
 from src.subway.station import Station
-from utils import to_min_sec
+from utils import format_time
 
 
 class Train:
@@ -49,7 +49,7 @@ class Train:
                 self.psg_exchange(len(stations_list), self.current_station)
 
             if current_time >= self.ready_to_depart_at:  # Depart towards the next station
-                print(f"{to_min_sec(current_time)} - {self} departing from {self.current_station} "
+                print(f"{format_time(current_time)} - {self} departing from {self.current_station} "
                       f"towards {self.next_station}")
                 self.state = TrainState.EN_ROUTE
                 self.arrival_time = current_time + TRAVEL_TIME_BETWEEN_STATIONS
@@ -63,7 +63,7 @@ class Train:
         if self.state == TrainState.EN_ROUTE:
 
             if current_time >= self.arrival_time:  # Train arrived at a station
-                print(f"{to_min_sec(current_time)} - {self} arrived at {self.next_station}")
+                print(f"{format_time(current_time)} - {self} arrived at {self.next_station}")
                 self.current_station = self.next_station
                 self.next_station = None
                 self.state = TrainState.AT_STATION
@@ -71,7 +71,7 @@ class Train:
 
                 # Reverse directions if arrived end station
                 if self.current_station.is_end:
-                    print(f"{to_min_sec(current_time)} - {self} arrived at end station, reversing direction.")
+                    print(f"{format_time(current_time)} - {self} arrived at end station, reversing direction.")
                     self.direction *= -1
 
     def psg_exchange(self,

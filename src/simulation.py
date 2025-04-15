@@ -1,9 +1,8 @@
-from constants import TRAVEL_TIME_BETWEEN_STATIONS, DWELL_TIME_AT_STATION
-
 from src.subway.subway_line import SubwayLine
 
 
 class Simulation:
+    # lines: list[SubwayLine]
 
     def __init__(self):
         self.current_time: int = 0  # Simulation time in minutes
@@ -18,9 +17,11 @@ class Simulation:
         for line in self.lines:
             line.update(self.current_time)
 
+            if self.current_time == 240 or self.current_time == 480:
+                line.add_train()
+
             for station in line.stations:
                 station.random_psg_arrival()
-
 
         # Increment time for the next step
         self.current_time += 1

@@ -1,3 +1,4 @@
+import os
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
@@ -7,7 +8,9 @@ from src.simulation import Simulation
 
 def animate_simulation(sim: Simulation,
                        duration_seconds: int,
-                       animation_interval_ms: int):
+                       animation_interval_ms: int,
+                       save_video: bool = False,
+                       output_dir: str = "."):
 
     line = sim.lines[0]  # Only visualize first line for now
 
@@ -22,10 +25,9 @@ def animate_simulation(sim: Simulation,
     time_text = ax.text(0.01, 0.90, f'Time: {sim.current_time} s', transform=ax.transAxes)
 
     # Initialize plot elements for trains and stations using placeholder data (0,0)
-    train_markers = [ax.plot(0, 0, 's', markersize=10, label=f'{t.id}')[0] for t in line.trains]
+    train_markers = [ax.plot(0, 0, 's', markersize=10)[0] for t in line.trains]
     # train_texts = [ax.text(0, 0, f'{t.id}', va='center', fontsize=9) for t in line.trains]
     train_psg = [ax.text(0, 0, f'{t.n_psg}', va='center', fontsize=9) for t in line.trains]
-
     station_n_psg_up = [ax.text(s.id, -0.3, f'{s.psg_waiting_up}', va='center', fontsize=9, color="red")
                         for s in line.stations]
 
@@ -41,6 +43,12 @@ def animate_simulation(sim: Simulation,
 
         sim.step()
         updates = []  # Artists to be redrawn
+
+        # Add empty train markers if new train was added
+        if len(train_markers) < len(line.trains):
+            new_t = line.trains[-1]
+            train_markers.append(ax.plot(0, 0, 's', markersize=10, label=f'{new_t.id}')[0])
+            train_psg.append(ax.text(0, 0, f'{new_t.n_psg}', va='center', fontsize=9))
 
         # Update train markers and text labels
         for i, train in enumerate(line.trains):
@@ -85,8 +93,32 @@ def animate_simulation(sim: Simulation,
                                   blit=True,
                                   repeat=False)
 
-    ax.legend(loc='upper right')
-    plt.tight_layout()
-    plt.show()
+    # --- Save Animation (BEFORE plt.show()) ---
+    if save_video:
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)  # Create output directory if it doesn't exist
 
-    # todo add code to save the visualization as mp4 or similar format
+        # Define filenames
+        output_filename_mp4 = os.path.join(output_dir, "subway_simulation.mp4")
+        # output_filename_gif = os.path.join(output_dir, "subway_simulation.gif")
+
+        # --- Try saving as MP4 using ffmpeg ---
+        save_fps_video = 30  # Adjust FPS for the saved video (e.g., 30)
+        save_dpi = 150  # Adjust DPI for resolution/quality
+        try:
+            print(f"Attempting to save animation to {output_filename_mp4}...")
+            print(f"(Using writer='ffmpeg', fps={save_fps_video}, dpi={save_dpi})")
+            # You might need to specify writer='ffmpeg_file' on some systems
+            ani.save(output_filename_mp4, writer='ffmpeg', fps=save_fps_video, dpi=save_dpi)
+            print(f"Successfully saved MP4: {output_filename_mp4}")
+        except FileNotFoundError:
+            print("\nERROR: 'ffmpeg' writer not found.")
+            print("Please install FFmpeg and ensure it's in your system's PATH.")
+            print("See FFmpeg website for installation instructions.\n")
+        except Exception as e:
+            print(f"\nERROR saving MP4: {e}\n")
+
+    else:
+        ax.legend(loc='upper right')
+        plt.tight_layout()
+        plt.show()
