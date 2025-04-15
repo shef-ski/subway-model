@@ -2,7 +2,7 @@ from src.subway.subway_line import SubwayLine
 
 
 class Simulation:
-    # lines: list[SubwayLine]
+    lines: list[SubwayLine]
 
     def __init__(self):
         self.current_time: int = 0  # Simulation time in minutes
@@ -17,11 +17,9 @@ class Simulation:
         for line in self.lines:
             line.update(self.current_time)
 
-            if self.current_time == 240 or self.current_time == 480:
+            # For now, add trains every 4 minutes and have max 5 --> todo: make this more intelligent
+            if self.current_time % 240 == 0 and len(line.trains) < 5:
                 line.add_train()
-
-            for station in line.stations:
-                station.random_psg_arrival()
 
         # Increment time for the next step
         self.current_time += 1

@@ -47,7 +47,7 @@ def animate_simulation(sim: Simulation,
         # Add empty train markers if new train was added
         if len(train_markers) < len(line.trains):
             new_t = line.trains[-1]
-            train_markers.append(ax.plot(0, 0, 's', markersize=10, label=f'{new_t.id}')[0])
+            train_markers.append(ax.plot(0, 0, 's', markersize=10)[0])
             train_psg.append(ax.text(0, 0, f'{new_t.n_psg}', va='center', fontsize=9))
 
         # Update train markers and text labels
@@ -88,12 +88,12 @@ def animate_simulation(sim: Simulation,
 
     # --- Create and Run Animation ---
     ani = animation.FuncAnimation(fig, update,
-                                  frames=duration_seconds,  # Duration drives frame count
-                                  interval=animation_interval_ms,  # Controls playback speed
-                                  blit=True,
+                                  frames=duration_seconds,  # duration drives frame count
+                                  interval=animation_interval_ms,  # controls playback speed
+                                  blit=True,  # smoother animation
                                   repeat=False)
 
-    # --- Save Animation (BEFORE plt.show()) ---
+    # --- Save or Show animation ---
     if save_video:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)  # Create output directory if it doesn't exist
@@ -117,7 +117,6 @@ def animate_simulation(sim: Simulation,
             print("See FFmpeg website for installation instructions.\n")
         except Exception as e:
             print(f"\nERROR saving MP4: {e}\n")
-
     else:
         ax.legend(loc='upper right')
         plt.tight_layout()

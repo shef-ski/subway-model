@@ -44,7 +44,7 @@ class SubwayLine:
                 self.train_queue.append(new_train)
 
     def update(self, current_time):
-        """Try to deploy the first queued train, then update all trains."""
+        """Try to deploy the first queued train, then update all trains and all stations."""
 
         if self.train_queue and self._first_station_is_available():
             deployed_train = self.train_queue.pop(0)
@@ -52,6 +52,9 @@ class SubwayLine:
 
         for train in self.trains:
             train.update(current_time, self.stations)
+
+        for station in self.stations:
+            station.random_psg_arrival()
 
     def _first_station_is_available(self):
         for train in self.trains:

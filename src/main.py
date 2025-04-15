@@ -7,7 +7,7 @@ sim = Simulation()
 
 # Create a subway line and add some initial trains
 line = SubwayLine("U4", 7)
-line.add_train()  # only add one train at the beginning, more added dynamically
+# line.add_train()  # only add one train at the beginning, more added dynamically
 
 # Add the line to the simulation
 sim.add_line(line)
