@@ -2,15 +2,15 @@ from abc import ABC
 from typing import List
 
 from src.subway.abstract_subway_line import AbstractSubwayLine
-from src.subway.station import Station
+from src.subway.generic_subway.generic_station import AbstractStation
 from src.subway.train import Train
 
 
-class SubwayLine(AbstractSubwayLine, ABC):
+class NycSubwayLine(AbstractSubwayLine, ABC):
 
     def __init__(self,
                  name: str,
-                 n_stations: int):
+                 stations: List[AbstractStation]):
 
         self.name = name  # e.g., U4
 
@@ -21,13 +21,6 @@ class SubwayLine(AbstractSubwayLine, ABC):
 
         # Used to give unique id's to trains
         self.train_id_counter = 1
-
-        # Initialize stations
-        # The id's go from 1 to n_stations
-        for station_id in range(1, n_stations+1):
-            is_end = (station_id == 1 or station_id == n_stations)
-            new_station = Station(station_id, is_end)
-            self.stations.append(new_station)
 
         self.first_station = self.stations[0]
 
@@ -70,6 +63,7 @@ class SubwayLine(AbstractSubwayLine, ABC):
     def get_trains(self) -> List[Train]:
         return self.trains
 
-    def get_stations(self) -> List[Station]:
+    def get_stations(self) -> List[AbstractStation
+    ]:
         return self.stations
 

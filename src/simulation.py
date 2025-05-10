@@ -1,5 +1,4 @@
 from src.subway.abstract_subway_line import AbstractSubwayLine
-from src.subway.subway_line import SubwayLine
 
 
 class Simulation:

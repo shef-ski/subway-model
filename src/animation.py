@@ -27,11 +27,11 @@ def animate_simulation(sim: Simulation,
     # Initialize plot elements for trains and stations using placeholder data (0,0)
     train_markers = [ax.plot(0, 0, 's', markersize=10)[0] for t in line.get_trains()]
     # train_texts = [ax.text(0, 0, f'{t.id}', va='center', fontsize=9) for t in line.get_trains()]
-    train_psg = [ax.text(0, 0, f'{t.n_psg}', va='center', fontsize=9) for t in line.get_trains()]
-    station_n_psg_up = [ax.text(s.id, -0.3, f'{s.psg_waiting_up}', va='center', fontsize=9, color="red")
+    train_psg = [ax.text(0, 0, f'{len(t.passengers)}', va='center', fontsize=9) for t in line.get_trains()]
+    station_n_psg_up = [ax.text(s.id, -0.3, f'{len(s.get_waiting_psg_up())}', va='center', fontsize=9, color="red")
                         for s in line.get_stations()]
 
-    station_n_psg_down = [ax.text(s.id, 0.3, f'{s.psg_waiting_down}', va='center', fontsize=9, color="red")
+    station_n_psg_down = [ax.text(s.id, 0.3, f'{len(s.get_waiting_psg_down())}', va='center', fontsize=9, color="red")
                           for s in line.get_stations()]
 
     # --- Update function ---
@@ -48,7 +48,7 @@ def animate_simulation(sim: Simulation,
         if len(train_markers) < len(line.get_trains()):
             new_t = line.get_trains()[-1]
             train_markers.append(ax.plot(0, 0, 's', markersize=10)[0])
-            train_psg.append(ax.text(0, 0, f'{new_t.n_psg}', va='center', fontsize=9))
+            train_psg.append(ax.text(0, 0, f'{len(new_t.passengers)}', va='center', fontsize=9))
 
         # Update train markers and text labels
         for i, train in enumerate(line.get_trains()):
@@ -69,14 +69,14 @@ def animate_simulation(sim: Simulation,
                 train_markers[i].set_data([x_pos], [y_pos])
                 # train_texts[i].set_position((x_pos+0.04, y_pos))  # Position text next to marker
                 train_psg[i].set_position((x_pos+0.04, y_pos))  # Position text next to marker
-                train_psg[i].set_text(f"{train.n_psg}")
+                train_psg[i].set_text(f"{len(train.passengers)}")
                 updates.append(train_markers[i])
                 #updates.append(train_texts[i])
                 updates.append(train_psg[i])
 
         for i, station in enumerate(line.get_stations()):
-            station_n_psg_up[i].set_text(f"{station.psg_waiting_up}")
-            station_n_psg_down[i].set_text(f"{station.psg_waiting_down}")
+            station_n_psg_up[i].set_text(f"{len(station.get_waiting_psg_up())}")
+            station_n_psg_down[i].set_text(f"{len(station.get_waiting_psg_down())}")
             updates.append(station_n_psg_up[i])
             updates.append(station_n_psg_down[i])
 

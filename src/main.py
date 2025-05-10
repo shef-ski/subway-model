@@ -1,13 +1,13 @@
 from src.data.nyc_data_service import NycDataService
 from src.simulation import Simulation
-from src.subway.subway_line import SubwayLine
+from src.subway.generic_subway.generic_subway_line import SubwayLine
 from src.animation import animate_simulation
 
 # Create a simulation
 sim = Simulation()
 
 nyc_data_service = NycDataService()
-#line_nyc = nyc_data_service.load_nyc_line("Broadway")
+#line_nyc = nyc_data_service.load_nyc_line("Crosstown")
 line = SubwayLine("U4", 7)
 # line.add_train()  # only add one train at the beginning, more added dynamically
 

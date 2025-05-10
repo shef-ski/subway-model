@@ -1,6 +1,7 @@
 import os
 
-from src.subway.subway_line import SubwayLine
+from src.subway.abstract_subway_line import AbstractSubwayLine
+from src.subway.nyc_subway.nyc_subway_line import NycSubwayLine
 
 
 class NycDataService:
@@ -27,12 +28,13 @@ class NycDataService:
         return True
 
 
-    def load_nyc_line(self, name: str) -> SubwayLine:
+    def load_nyc_line(self, name: str) -> AbstractSubwayLine:
 
         if not self._line_data_exists(name):
             raise ValueError(f"Cannot find data for lane {name}")
 
-        return SubwayLine(name)
+
+        return NycSubwayLine(name, [])
 
 
 

@@ -1,16 +1,11 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from src.subway.station import Station
+from src.subway.abstract_station import AbstractStation
 from src.subway.train import Train
 
 
 class AbstractSubwayLine(ABC):
-
-    @abstractmethod
-    def __init__(self, name: str, n_stations: int):
-        """Initialize the subway line with a name and number of stations."""
-        pass
 
     @abstractmethod
     def add_train(self):
@@ -32,5 +27,5 @@ class AbstractSubwayLine(ABC):
         pass
 
     @abstractmethod
-    def get_stations(self) -> List[Station]:
+    def get_stations(self) -> List[AbstractStation]:
         pass
