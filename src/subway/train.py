@@ -2,7 +2,7 @@ import typing
 
 from src.constants import TrainState, DWELL_TIME_AT_STATION, TRAVEL_TIME_BETWEEN_STATIONS
 from src.subway.station import Station
-from utils import format_time
+from src.utils import format_time
 
 
 class Train:

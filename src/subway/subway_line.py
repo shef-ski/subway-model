@@ -1,8 +1,12 @@
+from abc import ABC
+from typing import List
+
+from src.subway.abstract_subway_line import AbstractSubwayLine
 from src.subway.station import Station
 from src.subway.train import Train
 
 
-class SubwayLine:
+class SubwayLine(AbstractSubwayLine, ABC):
 
     def __init__(self,
                  name: str,
@@ -63,4 +67,9 @@ class SubwayLine:
         return True
 
 
+    def get_trains(self) -> List[Train]:
+        return self.trains
+
+    def get_stations(self) -> List[Station]:
+        return self.stations
 

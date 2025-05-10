@@ -1,0 +1,6 @@
+data-source:
+ridership:
+	https://catalog.data.gov/dataset/mta-subway-hourly-ridership-beginning-february-2022
+	https://catalog.data.gov/dataset/mta-subway-hourly-ridership-beginning-2025
+origin-destination-ridership: https://catalog.data.gov/dataset/mta-subway-origin-destination-ridership-estimate-beginning-2025
+lines: https://catalog.data.gov/dataset/mta-subway-stations
