@@ -1,8 +1,10 @@
-import typing
+import random
+from typing import List, Optional
 
 from src.constants import TrainState, DWELL_TIME_AT_STATION, TRAVEL_TIME_BETWEEN_STATIONS
-from src.subway.station import Station
-from utils import format_time
+from src.subway.subway_station import SubwayStation
+from src.subway.passenger import SubwayPassenger
+from src.utils import format_time
 
 
 class Train:
@@ -10,12 +12,12 @@ class Train:
     capacity = 500  # quick assumption, do more research on train capacity
 
     def __init__(self,
-                 train_id: int):
+                 train_id: int, stations_in_line: List[SubwayStation]):
 
         self.id = train_id
-        self.current_station: typing.Optional[Station] = None
+        self.current_station: Optional[SubwayStation] = None
 
-        self.n_psg = 0  # dynamic
+        self.passengers: List[SubwayPassenger] = []
 
         self.state = TrainState.IN_QUEUE
 
@@ -23,8 +25,12 @@ class Train:
         # Direction is either 1 or -1
         # If 1, the station id is increasing, else decreasing to represent the travel direction ('up' vs 'down')
         self.direction = 1
+
         self.next_station = None
         self.prev_station = None
+
+        self.remaining_destinations: List[SubwayStation] = stations_in_line
+        self.stations_in_line = stations_in_line
 
         # Time information
         self.arrival_time = None  # int (total seconds) - relevant when state == EN_ROUTE
@@ -43,10 +49,11 @@ class Train:
 
                 self.ready_to_depart_at = current_time + DWELL_TIME_AT_STATION
 
-                self.next_station = self._get_next_station(stations_list)
+                self.remaining_destinations = self.remaining_destinations[1:]
+                self.next_station = self.remaining_destinations[0]
 
                 # Passengers leave and enter
-                self.psg_exchange(len(stations_list), self.current_station)
+                self.psg_exchange(self.current_station)
 
             if current_time >= self.ready_to_depart_at:  # Depart towards the next station
                 print(f"{format_time(current_time)} - {self} departing from {self.current_station} "
@@ -72,37 +79,35 @@ class Train:
                 # Reverse directions if arrived end station
                 if self.current_station.is_end:
                     print(f"{format_time(current_time)} - {self} arrived at end station, reversing direction.")
-                    self.direction *= -1
+                    self.direction *=-1
+                    if self.direction == -1:
+                        self.remaining_destinations = list(reversed(self.stations_in_line))
+                    else:
+                        self.remaining_destinations = self.stations_in_line
 
     def psg_exchange(self,
-                     n_stations: int,
-                     station: Station):
+                     station: SubwayStation):
 
         # --- Disembarking ---
         # current naive assumption: all passengers leaving at one of the remaining stations (flat percentage)
-        n_leaving = round(1 / (n_stations - 1) * self.n_psg)
-        self.n_psg -= n_leaving
+        #n_leaving = round(1 / (n_stations - 1) * self.n_psg)
+
+        self.passengers = [passenger for passenger in self.passengers if passenger.leave_id != station.id]
 
         # --- Embarking ---
-        n_entering = station.get_waiting_psg(self.direction)
-        if self.n_psg + n_entering > self.capacity:
-            self.n_psg = self.capacity
-            n_entered = self.capacity - self.n_psg
-        else:
-            self.n_psg += n_entering
-            n_entered = n_entering
+        entering_passengers = station.get_waiting_psg_for_train([station.id for station in self.remaining_destinations])
+        if len(self.passengers) + len(entering_passengers) > self.capacity:
+            remaining_capacity = self.capacity - len(self.passengers)
+            entering_passengers = random.sample(entering_passengers, remaining_capacity)
 
-        station.reduce_waiting_psg(self.direction, n_entered)
-
-    def _get_next_station(self, stations_list: list):
-        current_station_index = self.current_station.id - 1
-        return stations_list[current_station_index + self.direction]
+        station.remove_waiting_passengers(entering_passengers)
+        self.passengers = [*self.passengers, *entering_passengers]
 
     @property
     def pct_utilized(self):
-        return self.n_psg / self.capacity
+        return len(self.passengers) / self.capacity
 
-    def set_current_station(self, new_station: Station):
+    def set_current_station(self, new_station: SubwayStation):
         self.current_station = new_station
         self.state = TrainState.AT_STATION
 

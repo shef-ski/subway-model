@@ -14,6 +14,10 @@ Use Python 3.12 or a similar version. Create a virtual environment using ``pytho
 
 To start a simulation, run the main.py.
 
+From repo root
+```
+python -m src.main
+```
 
 ### Saving simulations (optional)
 
