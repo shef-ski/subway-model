@@ -33,6 +33,9 @@ stop_times <- read_csv(file.path(gtfs_path, "stop_times.txt"))
 trip_routes <- trips %>%
   inner_join(routes, by = "route_id")
 
+trips_for_selected_route <- trip_routes %>%
+  filter(route_id == selected_route_id)
+
 # Pick one representative trip per route_id to avoid duplicates
 representative_trips <- trip_routes %>%
   group_by(route_id) %>%
@@ -46,11 +49,23 @@ ordered_stops <- representative_trips %>%
   inner_join(stops, by = "stop_id") %>%
   arrange(route_id, trip_id, stop_sequence) %>%
   rename(gtfs_stop_id = stop_id) %>%
-  mutate(sortorder = row_number()) %>%
-  filter(route_id==selected_route_id)
+  mutate(
+    gtfs_stop_id = substr(gtfs_stop_id, 1, nchar(gtfs_stop_id) - 1),
+    sortorder = row_number()
+  ) %>%
+  filter(route_id == selected_route_id)
+
+direction_along_sortorder=1
+direction_against_sortorder=0
+
+stops_for_selected_route <- stop_times %>%
+  filter(trip_id %in% trips_for_selected_route$trip_id) %>%
+  left_join(trips, by="trip_id") %>%
+  mutate(stop_id = substr(stop_id, 1, nchar(stop_id) - 1)) %>%
+  select(stop_id, service_id, direction_id, arrival_time, departure_time)
 
 lines_cleaned <- lines %>%
-  mutate(gtfs_stop_id = paste(`GTFS Stop ID`, "S", sep="")) %>%
+  mutate(gtfs_stop_id = `GTFS Stop ID`) %>%
   select(Line, gtfs_stop_id, complex_id=`Complex ID`)
 
 complex_stations <- ordered_stops  %>%
@@ -59,16 +74,25 @@ complex_stations <- ordered_stops  %>%
 
 line_metadata <- complex_stations %>%
   mutate(sortorder = sortorder - min(sortorder, na.rm = TRUE)) %>%
-  select(stop_name,Line, sortorder, complex_id)
+  select(stop_name,Line, sortorder, complex_id, gtfs_stop_id)
 
 sortorder_complex_lookup <- line_metadata %>%
-  select(sortorder, complex_id)
+  select(sortorder, complex_id, stop_id = gtfs_stop_id)
 
 dir.create("line_outputs")
 dir.create(paste("line_outputs",selected_line_name, sep="/"))
 
 filename <- paste0("line_outputs/", selected_line_name, "/line_metadata.csv")
 write_csv(line_metadata %>% select(stop_name,Line, sortorder), filename)
+
+train_arrival_lookup_table <- stops_for_selected_route %>%
+  left_join(sortorder_complex_lookup, by="stop_id") %>%
+  mutate(direction_id = if_else(direction_id == 0, -1, direction_id)) %>%
+  filter(!is.na(sortorder)) %>%
+  select(service_id, direction=direction_id, arrival_time, departure_time, station_id=sortorder)
+
+filename <- paste0("line_outputs/", selected_line_name, "/train_arrival_lookup_table.csv")
+write_csv(train_arrival_lookup_table, filename)
 
 # direction_estimates
 
