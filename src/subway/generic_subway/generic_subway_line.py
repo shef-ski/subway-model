@@ -26,10 +26,11 @@ class GenericSubwayLine(AbstractSubwayLine, ABC):
 
         if random.random() < GenericSubwayLine.p_arrival_in_a_second:
             # A passenger arrives
-            valid_stations = [s for s in self.stations if s.id != station.id]
-            destination_station = random.choice(valid_stations)
+            stations_excluding_self = [s for s in self.stations if s.id != station.id]
+            destination_station = random.choice(stations_excluding_self)
             current_index = self.stations.index(station)
             destination_index = self.stations.index(destination_station)
+
             direction = 1 if destination_index > current_index else -1
 
             passenger = SubwayPassenger(entry_id=station.id, leave_id=destination_station.id, direction=direction)

@@ -61,11 +61,14 @@ line_metadata <- complex_stations %>%
   mutate(sortorder = sortorder - min(sortorder, na.rm = TRUE)) %>%
   select(stop_name,Line, sortorder, complex_id)
 
+sortorder_complex_lookup <- line_metadata %>%
+  select(sortorder, complex_id)
+
 dir.create("line_outputs")
 dir.create(paste("line_outputs",selected_line_name, sep="/"))
 
 filename <- paste0("line_outputs/", selected_line_name, "/line_metadata.csv")
-write_csv(line_metadata, filename)
+write_csv(line_metadata %>% select(stop_name,Line, sortorder), filename)
 
 # direction_estimates
 
@@ -74,10 +77,15 @@ direction_estimates <- read_delim(DIRECTION_ESTIMATES_PATH, skip = 0, col_names 
 
 filtered_df <- direction_estimates %>%
   filter(
-    origin %in% complex_stations$complex_id |
+    origin %in% complex_stations$complex_id &
       destination %in% complex_stations$complex_id
   ) %>%
-  select(Year,Month,day_of_week,hour_of_day,origin_complex=origin,destination_complex=destination, estimated_ridership)
+  select(Year,Month,day_of_week,hour_of_day,origin_complex=origin,destination_complex=destination, estimated_ridership) %>%
+  left_join(sortorder_complex_lookup, by = c("origin_complex" = "complex_id")) %>%
+  rename(origin_sortorder = sortorder) %>%
+  left_join(sortorder_complex_lookup, by = c("destination_complex" = "complex_id")) %>%
+  rename(destination_sortorder = sortorder) %>%
+  select(Year,Month,day_of_week,hour_of_day,origin=origin_sortorder, destination=destination_sortorder, estimated_ridership)
 
 filename <- paste0("line_outputs/", selected_line_name, "/direction_estimates.csv")
 write_csv(filtered_df, filename)

@@ -1,69 +1,57 @@
+import random
 from abc import ABC
 from typing import List
 
+import pandas as pd
+
 from src.subway.abstract_subway_line import AbstractSubwayLine
+from src.subway.generic_subway.generic_subway_line import GenericSubwayLine
+from src.subway.passenger import SubwayPassenger
 from src.subway.subway_station import SubwayStation
-from src.subway.train import Train
 
 
 class NycSubwayLine(AbstractSubwayLine, ABC):
 
     def __init__(self,
                  name: str,
-                 stations: List[SubwayStation]):
+                 stations: List[SubwayStation],
+                 arriving_passengers_lookup: pd.DataFrame):
+        self.arriving_passengers_lookup = arriving_passengers_lookup
+        super().__init__(name, stations)
 
-        self.name = name  # e.g., U4
+    def sample_arriving_passengers(self, station: SubwayStation) -> List[SubwayPassenger]:
 
-        # Store the stations and trains in a list
-        self.stations = []
-        self.trains = []
-        self.train_queue = []  # store trains which are waiting to be deployed
+        # for now hardcoded time: TODO introduce simulation time
+        year = 2025
+        month = 1
+        day_of_week = "Monday"
+        hour_of_day = 8
 
-        # Used to give unique id's to trains
-        self.train_id_counter = 1
+        stations_excluding_self = [s for s in self.stations if s.id != station.id]
 
-        self.first_station = self.stations[0]
+        passengers = []
+        for other_station in stations_excluding_self:
+            estimated_ridership = self.lookup_ridership(year, month, day_of_week, hour_of_day, station.id, other_station.id)
 
-    def add_train(self):
+            for i in range(1, round(estimated_ridership) + 1):
+                current_index = self.stations.index(station)
+                destination_index = self.stations.index(other_station)
 
-        # Create new train and raise counter to ensure unique naming
-        new_train = Train(self.train_id_counter)
-        self.train_id_counter += 1
-        self.trains.append(new_train)
+                direction = 1 if destination_index > current_index else -1
 
-        # Decide whether to queue or to deploy the new train
-        if self.train_queue:
-            self.train_queue.append(new_train)
-        else:
-            if self._first_station_is_available():
-                new_train.set_current_station(self.first_station)
-            else:
-                self.train_queue.append(new_train)
+                passenger = SubwayPassenger(entry_id=station.id, leave_id=other_station.id, direction=direction)
+                passengers.append(passenger)
 
-    def update(self, current_time):
-        """Try to deploy the first queued train, then update all trains and all stations."""
+        return passengers
 
-        if self.train_queue and self._first_station_is_available():
-            deployed_train = self.train_queue.pop(0)
-            deployed_train.set_current_station(self.first_station)
-
-        for train in self.trains:
-            train.update(current_time, self.stations)
-
-        for station in self.stations:
-            station.random_psg_arrival()
-
-    def _first_station_is_available(self):
-        for train in self.trains:
-            if train.current_station is self.first_station:
-                return False
-        return True
-
-
-    def get_trains(self) -> List[Train]:
-        return self.trains
-
-    def get_stations(self) -> List[SubwayStation
-    ]:
-        return self.stations
-
+    def lookup_ridership(self, year, month, day_of_week, hour_of_day, origin, destination):
+        df = self.arriving_passengers_lookup
+        result = df[
+            (df["Year"] == year) &
+            (df["Month"] == month) &
+            (df["day_of_week"] == day_of_week) &
+            (df["hour_of_day"] == hour_of_day) &
+            (df["origin"] == origin) &
+            (df["destination"] == destination)
+            ]["estimated_ridership"]
+        return result.iloc[0] if not result.empty else 0

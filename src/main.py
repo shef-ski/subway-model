@@ -7,7 +7,7 @@ from src.animation import animate_simulation
 sim = Simulation()
 
 nyc_data_service = NycDataService()
-#line_nyc = nyc_data_service.load_nyc_line("Crosstown")
+#line = nyc_data_service.load_nyc_line("Crosstown")
 line = GenericSubwayLine("U4", 7)
 # line.add_train()  # only add one train at the beginning, more added dynamically
 
