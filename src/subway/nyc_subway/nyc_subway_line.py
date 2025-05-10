@@ -2,7 +2,7 @@ from abc import ABC
 from typing import List
 
 from src.subway.abstract_subway_line import AbstractSubwayLine
-from src.subway.generic_subway.generic_station import AbstractStation
+from src.subway.subway_station import SubwayStation
 from src.subway.train import Train
 
 
@@ -10,7 +10,7 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
 
     def __init__(self,
                  name: str,
-                 stations: List[AbstractStation]):
+                 stations: List[SubwayStation]):
 
         self.name = name  # e.g., U4
 
@@ -63,7 +63,7 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
     def get_trains(self) -> List[Train]:
         return self.trains
 
-    def get_stations(self) -> List[AbstractStation
+    def get_stations(self) -> List[SubwayStation
     ]:
         return self.stations
 

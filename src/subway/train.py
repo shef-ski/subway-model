@@ -2,7 +2,7 @@ import random
 from typing import List, Optional
 
 from src.constants import TrainState, DWELL_TIME_AT_STATION, TRAVEL_TIME_BETWEEN_STATIONS
-from src.subway.generic_subway.generic_station import AbstractStation
+from src.subway.subway_station import SubwayStation
 from src.subway.passenger import SubwayPassenger
 from src.utils import format_time
 
@@ -12,10 +12,10 @@ class Train:
     capacity = 500  # quick assumption, do more research on train capacity
 
     def __init__(self,
-                 train_id: int, stations_in_line: List[AbstractStation]):
+                 train_id: int, stations_in_line: List[SubwayStation]):
 
         self.id = train_id
-        self.current_station: Optional[AbstractStation] = None
+        self.current_station: Optional[SubwayStation] = None
 
         self.passengers: List[SubwayPassenger] = []
 
@@ -29,7 +29,7 @@ class Train:
         self.next_station = None
         self.prev_station = None
 
-        self.remaining_destinations: List[AbstractStation] = stations_in_line
+        self.remaining_destinations: List[SubwayStation] = stations_in_line
         self.stations_in_line = stations_in_line
 
         # Time information
@@ -49,11 +49,8 @@ class Train:
 
                 self.ready_to_depart_at = current_time + DWELL_TIME_AT_STATION
 
-                print(f"current_station: {self.current_station}")
-                print(f"remaining stations before update: {self.remaining_destinations}")
                 self.remaining_destinations = self.remaining_destinations[1:]
                 self.next_station = self.remaining_destinations[0]
-                print(f"remaining stations after update: {self.remaining_destinations}")
 
                 # Passengers leave and enter
                 self.psg_exchange(self.current_station)
@@ -89,7 +86,7 @@ class Train:
                         self.remaining_destinations = self.stations_in_line
 
     def psg_exchange(self,
-                     station: AbstractStation):
+                     station: SubwayStation):
 
         # --- Disembarking ---
         # current naive assumption: all passengers leaving at one of the remaining stations (flat percentage)
@@ -110,7 +107,7 @@ class Train:
     def pct_utilized(self):
         return len(self.passengers) / self.capacity
 
-    def set_current_station(self, new_station: AbstractStation):
+    def set_current_station(self, new_station: SubwayStation):
         self.current_station = new_station
         self.state = TrainState.AT_STATION
 
