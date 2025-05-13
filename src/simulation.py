@@ -1,14 +1,14 @@
-from src.subway.subway_line import SubwayLine
+from src.subway.abstract_subway_line import AbstractSubwayLine
 
 
 class Simulation:
-    lines: list[SubwayLine]
+    lines: list[AbstractSubwayLine]
 
     def __init__(self):
         self.current_time: int = 0  # Simulation time in minutes
         self.lines = []
 
-    def add_line(self, line: SubwayLine):
+    def add_line(self, line: AbstractSubwayLine):
         self.lines.append(line)
 
     def step(self):
@@ -18,7 +18,7 @@ class Simulation:
             line.update(self.current_time)
 
             # For now, add trains every 4 minutes and have max 5 --> todo: make this more intelligent
-            if self.current_time % 240 == 0 and len(line.trains) < 5:
+            if self.current_time % 240 == 0 and len(line.get_trains()) < 5:
                 line.add_train()
 
         # Increment time for the next step
