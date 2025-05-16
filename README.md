@@ -7,10 +7,13 @@ An agent-based model for simulating subway lines.
 
 ## Setup
 
-
-### Running simulations
+### Create environment
 
 Use Python 3.12 or a similar version. Create a virtual environment using ``python -m venv venv``, activate it (Windows: ``venv\Scripts\activate`` , Linux/macOS: ``source venv/bin/activate``) and use ``pip install -r requirements.txt`` to install the necessary packages into the venv.
+
+Alternatively, us ``uv`` to manage dependencies instead of venv. Ensure uv is installed on your system. Then, then create a uv venv using ``uv venv``, activate it using `.venv\Scripts\activate` and install packages from the pyproject.toml using ``uv sync``. New packages are added using ``uv add libraryname``. 
+
+### Running simulations
 
 To start a simulation, run the main.py.
 
