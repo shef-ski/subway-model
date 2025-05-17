@@ -1,4 +1,5 @@
 import random
+from datetime import datetime, timedelta
 from typing import List, Optional
 
 from src.constants import TrainState, DWELL_TIME_AT_STATION, TRAVEL_TIME_BETWEEN_STATIONS
@@ -40,14 +41,14 @@ class Train:
     def __repr__(self):
         return f"Train {self.id}"
 
-    def update(self, current_time: int, stations_list: list):
+    def update(self, current_time: datetime, stations_list: list):
 
         # Train is currently at a station
         if self.state == TrainState.AT_STATION:
             if self.ready_to_depart_at is None:  # Train just arrived / was deployed
                 # todo the dwell time should not be a constant but a r.v.
 
-                self.ready_to_depart_at = current_time + DWELL_TIME_AT_STATION
+                self.ready_to_depart_at = current_time + timedelta(seconds=DWELL_TIME_AT_STATION)
 
                 self.remaining_destinations = self.remaining_destinations[1:]
                 self.next_station = self.remaining_destinations[0]
@@ -59,7 +60,7 @@ class Train:
                 print(f"{format_time(current_time)} - {self} departing from {self.current_station} "
                       f"towards {self.next_station}")
                 self.state = TrainState.EN_ROUTE
-                self.arrival_time = current_time + TRAVEL_TIME_BETWEEN_STATIONS
+                self.arrival_time = current_time + timedelta(seconds=TRAVEL_TIME_BETWEEN_STATIONS)
 
                 self.prev_station = self.current_station
                 self.current_station = None  # No longer "at" the previous station
