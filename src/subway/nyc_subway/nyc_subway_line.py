@@ -27,6 +27,8 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
         stations_excluding_self = [s for s in self.stations if s.id != station.id]
 
         passengers = []
+
+        self._clean_old_entries(current_time)
         for other_station in stations_excluding_self:
             estimated_ridership = self.get_arrivals_for_current_time(current_time, station.id, other_station.id)
 
@@ -42,11 +44,13 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
         return passengers
 
     def _clean_old_entries(self, now: datetime):
+        # Ridership is sampeled at the start of the hour. This removes the dictionary for the old sampled times
         keys_to_delete = [
             key for key in self.sampled_lookup
             if datetime(key[0], key[1], key[2]).replace(hour=key[3]) < now.replace(minute=0, second=0, microsecond=0)
         ]
         for key in keys_to_delete:
+            print(f"cleaned entry {key}")
             del self.sampled_lookup[key]
 
     @staticmethod
@@ -72,10 +76,8 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
         return result.iloc[0] if not result.empty else 0
 
     def get_arrivals_for_current_time(self, current_time: datetime, origin, destination):
+        # key to lookup sampled arrival times
         key = self._lookup_key(current_time, origin, destination)
-
-        self._clean_old_entries(current_time)
-
         if key not in self.sampled_lookup:
             start_of_hour = current_time.replace(minute=0, second=0, microsecond=0)
             total_people = self.lookup_ridership_for_hour(current_time, origin, destination)

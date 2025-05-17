@@ -17,7 +17,7 @@ line = nyc_data_service.load_nyc_line("Crosstown")
 sim.add_line(line)
 
 # Run with matplotlib visualization
-SIMULATION_DURATION_SECONDS = 86400  # Total simulation time
+SIMULATION_DURATION_SECONDS = 160000  # Total simulation time
 ANIMATION_INTERVAL_MS = 2  # Visualization speed
 
 animate_simulation(sim,
