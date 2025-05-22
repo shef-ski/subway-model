@@ -48,7 +48,7 @@ class Train:
             if self.ready_to_depart_at is None:  # Train just arrived / was deployed
                 # todo the dwell time should not be a constant but a r.v.
 
-                self.ready_to_depart_at = current_time + timedelta(seconds=max(10, round(len(self.current_station.waiting_passengers)/DWELL_TIME_AT_STATION)))
+                self.ready_to_depart_at = current_time + timedelta(seconds=max(DWELL_TIME_AT_STATION, round(len(self.current_station.waiting_passengers)/100)))
 
                 self.remaining_destinations = self.remaining_destinations[1:]
                 self.next_station = self.remaining_destinations[0]
