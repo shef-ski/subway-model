@@ -1,13 +1,18 @@
 # compare utilization rates in 5 simulations
 
 
-from src.simulation import Simulation
-from src.subway.abstract_subway_line import AbstractSubwayLine
+import pandas as pd
+import matplotlib
+matplotlib.use('TkAgg') # not working even with default 'agg'
+from matplotlib import pyplot as plt
 
-from src.data.nyc_data_service import NycDataService
+from src.simulation import Simulation
+# from src.subway.abstract_subway_line import AbstractSubwayLine
+
+# from src.data.nyc_data_service import NycDataService
 from src.simulation import Simulation
 from src.subway.generic_subway.generic_subway_line import GenericSubwayLine
-from src.animation import animate_simulation
+# from src.animation import animate_simulation
 
 def calculate_average_utilization(sim: Simulation, duration: int) -> float:
     total_utilization = 0
@@ -45,22 +50,30 @@ for i in range(1, n + 1):
     avg_utilization = calculate_average_utilization(sim, duration)
 
     # Store the average utilization in the dictionary
-    average_utilization_rates[f"Simulation {i}"] = avg_utilization
+    average_utilization_rates[i] = avg_utilization
 
     # Print the result for the current simulation
     print(f"Average utilization in Simulation {i}: {avg_utilization * 100:.2f}%")
 
 
-# Optional: Print all average utilizations
+# Compare the results
 print("All average utilizations:")
 for sim, utilization in average_utilization_rates.items():
     print(f"{sim}: {utilization * 100:.2f}%")
 
-# Compare the results
+# Find the simulation with the maximum utilization rate
 best_simulation = max(average_utilization_rates, key=average_utilization_rates.get)
 # print("*** Best Simulation ***")
-print(f"**** {best_simulation} has the maximum utilization rate. ****")
+print(f"**** Simulation {best_simulation} has the maximum utilization rate. ****")
 
+
+# Visualize the optimal simulation results (and compare with the others)
+pd.DataFrame([average_utilization_rates]).T[0].plot()
+plt.title("Utilization rates across all simulations")
+plt.xlabel('Simulation')
+plt.ylabel('Y Average utilization rate') 
+plt.axvline(x=best_simulation, color='red', linestyle='--')
+plt.show()
 
 # # capacities = [300, 500, 700]  # Different capacity assumptions
 # # for capacity in capacities:
