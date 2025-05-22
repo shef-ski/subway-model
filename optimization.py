@@ -27,28 +27,45 @@ def calculate_average_utilization(sim: Simulation, duration: int) -> float:
 
     return total_utilization / total_trains
 
-# Create and configure the first simulation
-sim1 = Simulation()
-line1 = GenericSubwayLine("U4", 7)  # Replace with a concrete implementation
-sim1.add_line(line1)
+n = 5  # Replace with the desired number of simulations
 
-# Create and configure the second simulation
-sim2 = Simulation()
-line2 = GenericSubwayLine("U4", 7)  # Replace with a different configuration if needed
-sim2.add_line(line2)
+# Dictionary to store average utilization rates
+average_utilization_rates = {}
 
-# Run both simulations for the same duration
-duration = 3600  # 1 hour
-avg_utilization_sim1 = calculate_average_utilization(sim1, duration)
-avg_utilization_sim2 = calculate_average_utilization(sim2, duration)
+# Run n simulations
+for i in range(1, n + 1):
+    # Create and configure the simulation
+    sim = Simulation()
+    line = GenericSubwayLine("U4", 7, #train_capacity=500
+                             )  # Replace with a concrete implementation
+    sim.add_line(line)
+
+    # Run the simulation for the specified duration
+    duration = 3600  # 1 hour
+    avg_utilization = calculate_average_utilization(sim, duration)
+
+    # Store the average utilization in the dictionary
+    average_utilization_rates[f"Simulation {i}"] = avg_utilization
+
+    # Print the result for the current simulation
+    print(f"Average utilization in Simulation {i}: {avg_utilization * 100:.2f}%")
+
+
+# Optional: Print all average utilizations
+print("All average utilizations:")
+for sim, utilization in average_utilization_rates.items():
+    print(f"{sim}: {utilization * 100:.2f}%")
 
 # Compare the results
-print(f"Average utilization in Simulation 1: {avg_utilization_sim1 * 100:.2f}%")
-print(f"Average utilization in Simulation 2: {avg_utilization_sim2 * 100:.2f}%")
+best_simulation = max(average_utilization_rates, key=average_utilization_rates.get)
+# print("*** Best Simulation ***")
+print(f"**** {best_simulation} has the maximum utilization rate. ****")
 
-if avg_utilization_sim1 > avg_utilization_sim2:
-    print("Simulation 1 has better train utilization.")
-elif avg_utilization_sim1 < avg_utilization_sim2:
-    print("Simulation 2 has better train utilization.")
-else:
-    print("Both simulations have the same average train utilization.")
+
+# # capacities = [300, 500, 700]  # Different capacity assumptions
+# # for capacity in capacities:
+# #     sim = Simulation()
+# #     line = GenericSubwayLine("U4", 7, train_capacity=capacity)
+# #     sim.add_line(line)
+# #     avg_utilization = calculate_average_utilization(sim, duration=3600)
+# #     print(f"Train capacity {capacity}: Average utilization = {avg_utilization * 100:.2f}%")
