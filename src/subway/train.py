@@ -10,7 +10,7 @@ from src.utils import format_time
 
 class Train:
 
-    capacity = 500  # quick assumption, do more research on train capacity
+    capacity = 1200  # quick assumption, do more research on train capacity
 
     def __init__(self,
                  train_id: int, stations_in_line: List[SubwayStation]):
@@ -48,7 +48,7 @@ class Train:
             if self.ready_to_depart_at is None:  # Train just arrived / was deployed
                 # todo the dwell time should not be a constant but a r.v.
 
-                self.ready_to_depart_at = current_time + timedelta(seconds=DWELL_TIME_AT_STATION)
+                self.ready_to_depart_at = current_time + timedelta(seconds=max(10, round(len(self.current_station.waiting_passengers)/DWELL_TIME_AT_STATION)))
 
                 self.remaining_destinations = self.remaining_destinations[1:]
                 self.next_station = self.remaining_destinations[0]
@@ -56,7 +56,20 @@ class Train:
                 # Passengers leave and enter
                 self.psg_exchange(self.current_station)
 
-            if current_time >= self.ready_to_depart_at:  # Depart towards the next station
+            if current_time >= self.ready_to_depart_at and self.check_station_free() == True:  # Depart towards the next station
+                if self.direction == 1:
+                    if self.next_station.is_end:
+                        self.next_station.train_incoming_down()
+                    else:
+                        self.next_station.train_incoming_up()
+                    self.current_station.train_leave_up()
+                else:
+                    if self.next_station.is_end:
+                        self.next_station.train_incoming_up()
+                    else:
+                        self.next_station.train_incoming_down()
+                    self.current_station.train_leave_down()
+
                 print(f"{format_time(current_time)} - {self} departing from {self.current_station} "
                       f"towards {self.next_station}")
                 self.state = TrainState.EN_ROUTE
@@ -111,5 +124,16 @@ class Train:
     def set_current_station(self, new_station: SubwayStation):
         self.current_station = new_station
         self.state = TrainState.AT_STATION
+
+    def check_station_free(self):
+        if self.direction == 1:
+            return self.next_station.get_occupation_up() == False
+        else:
+            return self.next_station.get_occupation_down() == False
+
+
+
+
+
 
 

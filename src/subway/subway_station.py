@@ -12,6 +12,8 @@ class SubwayStation:
         self.is_end = is_end
 
         self.waiting_passengers: List[SubwayPassenger] = []
+        self.incoming_train_up = False
+        self.incoming_train_down = False
 
     def __repr__(self):
         return f"Station {self.id}"
@@ -30,3 +32,17 @@ class SubwayStation:
 
     def get_waiting_psg_down(self) -> List[SubwayPassenger]:
         return [passenger for passenger in self.waiting_passengers if passenger.direction == -1]
+    def get_occupation_up(self):
+        return self.incoming_train_up
+    def train_incoming_up(self):
+        self.incoming_train_up = True
+    def train_leave_up(self):
+        self.incoming_train_up = False
+    def get_occupation_down(self):
+        return self.incoming_train_down
+    def train_incoming_down(self):
+        self.incoming_train_down = True
+    def train_leave_down(self):
+        self.incoming_train_down = False
+
+
