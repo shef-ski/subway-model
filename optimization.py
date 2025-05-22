@@ -19,7 +19,7 @@ def calculate_average_utilization(sim: Simulation, duration: int) -> float:
     total_trains = 0
 
     for _ in range(duration):
-        sim.step(#train_capacity=500
+        sim.step(capacity=500
                  )  # Assuming a default train capacity of 500
         for line in sim.lines:
             for train in line.get_trains():
