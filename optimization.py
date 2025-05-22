@@ -14,13 +14,12 @@ from src.simulation import Simulation
 from src.subway.generic_subway.generic_subway_line import GenericSubwayLine
 # from src.animation import animate_simulation
 
-def calculate_average_utilization(sim: Simulation, duration: int) -> float:
+def calculate_average_utilization(sim: Simulation, duration: int, capacity:int) -> float:
     total_utilization = 0
     total_trains = 0
 
     for _ in range(duration):
-        sim.step(capacity=500
-                 )  # Assuming a default train capacity of 500
+        sim.step(capacity=capacity)  
         for line in sim.lines:
             for train in line.get_trains():
                 total_utilization += train.pct_utilized
@@ -32,43 +31,50 @@ def calculate_average_utilization(sim: Simulation, duration: int) -> float:
 
     return total_utilization / total_trains
 
-n = 5  # Replace with the desired number of simulations
+def run_simulations(n=5, duration=3600, capacity=500):
+    """
+    Runs `n` simulations of a subway line and calculates average utilization.
 
-# Dictionary to store average utilization rates
-average_utilization_rates = {}
+    Parameters:
+    - n (int): Number of simulations to run.
+    - duration (int): Duration of each simulation in seconds.
+    - capacity (int): Capacity of the train (used in utilization calculation).
 
-# Run n simulations
-for i in range(1, n + 1):
-    # Create and configure the simulation
-    sim = Simulation()
-    line = GenericSubwayLine("U4", 7, #train_capacity=500
-                             )  # Replace with a concrete implementation
-    sim.add_line(line)
+    Returns:
+    - dict: A dictionary mapping simulation number to average utilization rate.
+    """
+    average_utilization_rates = {}
 
-    # Run the simulation for the specified duration
-    duration = 3600  # 1 hour
-    avg_utilization = calculate_average_utilization(sim, duration)
+    for i in range(1, n + 1):
+        # Create and configure the simulation
+        sim = Simulation()
+        line = GenericSubwayLine("U4", 7)  # Customize or extend as needed
+        sim.add_line(line)
 
-    # Store the average utilization in the dictionary
-    average_utilization_rates[i] = avg_utilization
+        # Run the simulation and calculate utilization
+        avg_utilization = calculate_average_utilization(sim, duration, capacity=capacity)
+        average_utilization_rates[i] = avg_utilization
 
-    # Print the result for the current simulation
-    print(f"Average utilization in Simulation {i}: {avg_utilization * 100:.2f}%")
+        # Print the result
+        print(f"Average utilization in Simulation {i}: {avg_utilization * 100:.2f}%")
 
+    return average_utilization_rates
+
+results = run_simulations(n=10, duration=3600, capacity=500)
 
 # Compare the results
 print("All average utilizations:")
-for sim, utilization in average_utilization_rates.items():
+for sim, utilization in results.items():
     print(f"{sim}: {utilization * 100:.2f}%")
 
 # Find the simulation with the maximum utilization rate
-best_simulation = max(average_utilization_rates, key=average_utilization_rates.get)
+best_simulation = max(results, key=results.get)
 # print("*** Best Simulation ***")
 print(f"**** Simulation {best_simulation} has the maximum utilization rate. ****")
 
 
 # Visualize the optimal simulation results (and compare with the others)
-pd.DataFrame([average_utilization_rates]).T[0].plot()
+pd.DataFrame([results]).T[0].plot()
 plt.title("Utilization rates across all simulations")
 plt.xlabel('Simulation')
 plt.ylabel('Y Average utilization rate') 
