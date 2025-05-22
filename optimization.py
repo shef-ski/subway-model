@@ -64,20 +64,30 @@ def run_simulations(n=5, duration=3600, capacity=500):
 capacities= [100, 300, 500, 700]  # Different capacity assumptions
 results= {} 
 for capacity in capacities:
-    results[capacity]=run_simulations(n=10, duration=3600, capacity=capacity)
+    results[capacity]=run_simulations(n=10, # Number of simulations
+                   duration=3600,  # Duration of each simulation in seconds (e.g. 1 hour)
+                   capacity=capacity # Maximum train capacity
+                   )
 
 
-# Visualize the results
+# Create a DataFrame from the results
 df=pd.DataFrame(results)
-df.plot()
 
-# Create a scatter plot
-# plt.scatter(df.index, df.values)
+# Visualize the results - simple plot
+df.plot()
 
 plt.title("Utilization rates")
 plt.xlabel('Simulations')
 plt.ylabel('Utilization rate (ranging from 0 to 1)') 
 
 plt.legend(title='Maximum train capacity'#, loc='upper left'
-           ) 
+        ) 
+plt.show()
+
+
+# Create a joint plot with distributions
+import seaborn as sns
+sns.jointplot(df, 
+            #   kind="kde"
+              )
 plt.show()
