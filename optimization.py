@@ -60,31 +60,24 @@ def run_simulations(n=5, duration=3600, capacity=500):
 
     return average_utilization_rates
 
-results = run_simulations(n=10, duration=3600, capacity=500)
-
-# Compare the results
-print("All average utilizations:")
-for sim, utilization in results.items():
-    print(f"{sim}: {utilization * 100:.2f}%")
-
-# Find the simulation with the maximum utilization rate
-best_simulation = max(results, key=results.get)
-# print("*** Best Simulation ***")
-print(f"**** Simulation {best_simulation} has the maximum utilization rate. ****")
+# Run the simulations with different capacities
+capacities= [100, 300, 500, 700]  # Different capacity assumptions
+results= {} 
+for capacity in capacities:
+    results[capacity]=run_simulations(n=10, duration=3600, capacity=capacity)
 
 
-# Visualize the optimal simulation results (and compare with the others)
-pd.DataFrame([results]).T[0].plot()
-plt.title("Utilization rates across all simulations")
-plt.xlabel('Simulation')
-plt.ylabel('Y Average utilization rate') 
-plt.axvline(x=best_simulation, color='red', linestyle='--')
+# Visualize the results
+df=pd.DataFrame(results)
+df.plot()
+
+# Create a scatter plot
+# plt.scatter(df.index, df.values)
+
+plt.title("Utilization rates")
+plt.xlabel('Simulations')
+plt.ylabel('Utilization rate (ranging from 0 to 1)') 
+
+plt.legend(title='Maximum train capacity'#, loc='upper left'
+           ) 
 plt.show()
-
-# # capacities = [300, 500, 700]  # Different capacity assumptions
-# # for capacity in capacities:
-# #     sim = Simulation()
-# #     line = GenericSubwayLine("U4", 7, train_capacity=capacity)
-# #     sim.add_line(line)
-# #     avg_utilization = calculate_average_utilization(sim, duration=3600)
-# #     print(f"Train capacity {capacity}: Average utilization = {avg_utilization * 100:.2f}%")
