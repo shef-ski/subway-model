@@ -1,4 +1,4 @@
-# compare utilization rates in two simulations
+# compare utilization rates in 5 simulations
 
 
 from src.simulation import Simulation
