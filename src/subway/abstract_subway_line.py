@@ -18,10 +18,10 @@ class AbstractSubwayLine(ABC):
         # Used to give unique id's to trains
         self.train_id_counter = 1
 
-    def add_train(self):
-
+    def add_train(self, capacity: int):
+        
         # Create new train and raise counter to ensure unique naming
-        new_train = Train(self.train_id_counter, self.stations)
+        new_train = Train(self.train_id_counter, self.stations, capacity=capacity)
         self.train_id_counter += 1
         self.trains.append(new_train)
 
