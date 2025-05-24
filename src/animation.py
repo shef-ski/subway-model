@@ -62,7 +62,7 @@ def animate_simulation(sim: Simulation,
             elif train.state == TrainState.EN_ROUTE:
                 # Interpolate position based on time elapsed since departure
                 time_since_departure = sim.current_time - train.previous_departure_time
-                travel_progress = min(1.0, time_since_departure.total_seconds() / TRAVEL_TIME_BETWEEN_STATIONS)  # Clamp to max 1.0
+                travel_progress = min(1.0, time_since_departure.total_seconds() / train.get_travel_time())  # Clamp to max 1.0
                 start_station_pos = train.prev_station.id
                 end_station_pos = train.next_station.id
                 x_pos = start_station_pos + (end_station_pos - start_station_pos) * travel_progress
