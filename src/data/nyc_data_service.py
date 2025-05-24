@@ -1,5 +1,6 @@
 import csv
 import os
+from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import List, Dict, Tuple
 
@@ -61,8 +62,9 @@ class NycDataService:
         metadata_file_path = self._get_direction_estimate_path(name)
         lookup_table = pandas.read_csv(metadata_file_path)
         train_spawns = self.read_train_spawns(name, stations)
+        train_travel_times = self.read_train_travel_times(name, stations)
 
-        return NycSubwayLine(name, stations, lookup_table, train_spawns)
+        return NycSubwayLine(name, stations, lookup_table, train_spawns, train_travel_times)
 
     def _get_metadata_file_path(self, name) -> str:
         folder_path = os.path.join(self.data_path, name)
@@ -109,6 +111,57 @@ class NycDataService:
                 elif direction == -1 and station_id == end_station.id:
                     result[key] = end_station
         return result
+
+    def read_train_travel_times(self, name, stations):
+        travel_times = defaultdict(dict)
+        seen_directions = set()
+        direction_rows = {1: [], -1: []}
+
+        station_dict = {station.id : station for station in stations}
+
+        # Read and process the CSV
+        with open(self._get_train_arrival_file(name), newline='') as csvfile:
+            reader = csv.DictReader(csvfile)
+
+            for row in reader:
+                if row['service_id'] != 'Weekday':
+                    continue
+
+                direction = int(row['direction'])
+                if direction not in seen_directions:
+                    direction_rows[direction].append(row)
+
+                    station_ids_in_trip = [int(r['station_id']) for r in direction_rows[direction]]
+
+                    if len(stations) == len(set(station_ids_in_trip)):
+                        seen_directions.add(direction)
+
+                if len(seen_directions) == 2:
+                    break
+
+        for direction, rows in direction_rows.items():
+            # Remove duplicates to ensure we only get the first trip
+            unique_rows = []
+            seen_stations = set()
+            for r in rows:
+                sid = int(r['station_id'])
+                if sid not in seen_stations:
+                    seen_stations.add(sid)
+                    unique_rows.append(r)
+
+            unique_rows.sort(key=lambda r: self.parse_time(r['arrival_time']))
+
+            for i in range(len(unique_rows) - 1):
+                from_station = int(unique_rows[i]['station_id'])
+                to_station = int(unique_rows[i + 1]['station_id'])
+
+                if from_station in station_dict and to_station in station_dict:
+                    time1 = self.parse_time(unique_rows[i]['departure_time'])
+                    time2 = self.parse_time(unique_rows[i + 1]['arrival_time'])
+                    delta = int((time2 - time1).total_seconds())
+                    travel_times[station_dict[to_station]][direction] = delta
+
+        return dict(travel_times)
 
 
 

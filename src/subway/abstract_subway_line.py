@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import List
+from typing import List, Dict
 
 from src.subway.passenger import SubwayPassenger
 from src.subway.subway_station import SubwayStation
@@ -50,7 +50,7 @@ class AbstractSubwayLine(ABC):
             deployed_train.set_current_station(self.first_station)
 
         for train in self.trains:
-            train.update(current_time, self.stations)
+            train.update(current_time, self.get_train_travel_times())
 
         for station in self.stations:
             arriving_passengers = self.sample_arriving_passengers(station, current_time)
@@ -74,6 +74,10 @@ class AbstractSubwayLine(ABC):
 
     @abstractmethod
     def check_for_train_spawns(self, current_time):
+        pass
+
+    @abstractmethod
+    def get_train_travel_times(self) -> Dict[SubwayStation, Dict[int, int]]:
         pass
 
     def remove_trains_that_reached_end(self):

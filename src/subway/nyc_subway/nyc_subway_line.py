@@ -29,10 +29,12 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
                  name: str,
                  stations: List[SubwayStation],
                  arriving_passengers_lookup: pd.DataFrame,
-                 train_spawns: Dict[Tuple[str, int, int, int], SubwayStation]):
+                 train_spawns: Dict[Tuple[str, int, int, int], SubwayStation],
+                 train_travel_times: Dict[SubwayStation, Dict[int, int]]):
         self.arriving_passengers_lookup = arriving_passengers_lookup
         self.sampled_lookup = {}
         self.train_spawns = train_spawns
+        self.train_travel_times = train_travel_times
         super().__init__(name, stations)
 
     def sample_arriving_passengers(self, station: SubwayStation, current_time: datetime) -> List[SubwayPassenger]:
@@ -158,13 +160,15 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
         return datetime_distribution
 
 
+    def get_train_travel_times(self) -> Dict[SubwayStation, Dict[int, int]]:
+        return self.train_travel_times
+
 
     def check_for_train_spawns(self, current_time: datetime):
 
         key = build_lookup_key_from_datetime(current_time)
 
         if key in self.train_spawns:
-            print("spawn")
             spawning_station = self.train_spawns[key]
             direction = 1 if spawning_station.id == 0 else -1
 
