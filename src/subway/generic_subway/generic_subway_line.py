@@ -39,3 +39,8 @@ class GenericSubwayLine(AbstractSubwayLine, ABC):
 
         return passengers
 
+    def check_for_train_spawns(self, current_time: datetime):
+
+        if current_time.minute % 4 == 0 and current_time.second == 0 and len(self.get_trains()) < 5:
+            self.add_train(self.first_station, 1, True)
+

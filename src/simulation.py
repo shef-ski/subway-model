@@ -20,11 +20,6 @@ class Simulation:
 
         for line in self.lines:
             line.update(self.current_time)
-            elapsed_seconds = (self.current_time - self.start_time).total_seconds()
-            # For now, add trains every 4 minutes and have max 5 --> todo: make this more intelligent
-            if elapsed_seconds % 240 == 0 and len(line.get_trains()) < 5:
-                line.add_train()
-
         # Increment time for the next step
         self.current_time += self.timedelta
 
