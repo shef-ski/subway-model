@@ -11,6 +11,9 @@ origin-destination-ridership:
 lines:
 - https://catalog.data.gov/dataset/mta-subway-stations
 
+NYC geodata:
+- https://github.com/nycehs/NYC_geography/tree/master/uhf34_shapefiles 
+
 # Data Processing
 
 describe what the .R data processing files do exactly; what are the inputs and outputs respectively? A very general summary is enough, not too much detail
