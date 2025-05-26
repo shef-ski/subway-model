@@ -7,13 +7,18 @@ class SubwayStation:
 
     def __init__(self,
                  station_id: int,
-                 is_end: bool):
+                 is_end: bool,
+                 lon: float | None = None,
+                 lat: float | None = None):
         self.id = station_id
         self.is_end = is_end
 
         self.waiting_passengers: List[SubwayPassenger] = []
         self.incoming_train_up = False
         self.incoming_train_down = False
+
+        self.lon = lon
+        self.lat = lat
 
     def __repr__(self):
         return f"Station {self.id}"
