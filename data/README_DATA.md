@@ -13,7 +13,13 @@ lines:
 
 # Data Processing
 
-describe what the .R data processing files do exactly; what are the inputs and outputs respectively? A general summary is enough, not too much detail # TODO
+describe what the .R data processing files do exactly; what are the inputs and outputs respectively? A very general summary is enough, not too much detail
+
+
+# Data Sets
+
+maybe briefly mention / explain the datasets that we use and which attributes are relevenat for us
+
 
 
 # Example
