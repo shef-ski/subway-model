@@ -1,8 +1,8 @@
 import random
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Dict
 
-from src.constants import TrainState, DWELL_TIME_AT_STATION, TRAVEL_TIME_BETWEEN_STATIONS
+from src.constants import TrainState, DWELL_TIME_AT_STATION
 from src.subway.subway_station import SubwayStation
 from src.subway.passenger import SubwayPassenger
 from src.utils import format_time
@@ -13,9 +13,12 @@ class Train:
     
 
     def __init__(self,
-                 train_id: int, stations_in_line: List[SubwayStation],
-                 capacity = 2500  # quick assumption, do more research on train capacity
-                 ):
+                 train_id: int,
+                 stations_in_line: List[SubwayStation],
+                 direction: int,
+                 is_rotating_train: bool,
+                 capacity = 2500):
+
         self.capacity = capacity
         self.id = train_id
         self.current_station: Optional[SubwayStation] = None
@@ -24,16 +27,21 @@ class Train:
 
         self.state = TrainState.IN_QUEUE
 
-        # Travel information
-        # Direction is either 1 or -1
-        # If 1, the station id is increasing, else decreasing to represent the travel direction ('up' vs 'down')
-        self.direction = 1
+        self.direction = direction
 
         self.next_station = None
         self.prev_station = None
 
-        self.remaining_destinations: List[SubwayStation] = stations_in_line
+        self.is_rotating_train = is_rotating_train
+        self.finished_tour = False
+
+        if direction == 1:
+            self.remaining_destinations: List[SubwayStation] = stations_in_line
+        else:
+            self.remaining_destinations: List[SubwayStation] = stations_in_line[::-1]
+
         self.stations_in_line = stations_in_line
+        self.travel_time_to_next_station = 0
 
         # Time information
         self.arrival_time = None  # int (total seconds) - relevant when state == EN_ROUTE
@@ -43,7 +51,7 @@ class Train:
     def __repr__(self):
         return f"Train {self.id}"
 
-    def update(self, current_time: datetime, stations_list: list):
+    def update(self, current_time: datetime, station_travel_times: Dict[SubwayStation, Dict[int, int]]) -> None:
 
         # Train is currently at a station
         if self.state == TrainState.AT_STATION:
@@ -59,10 +67,13 @@ class Train:
                 self.psg_exchange(self.current_station, self.capacity)
 
             if current_time >= self.ready_to_depart_at:  # Depart towards the next station
+                travel_time = station_travel_times[self.next_station][self.direction]
                 print(f"{format_time(current_time)} - {self} departing from {self.current_station} "
-                      f"towards {self.next_station}")
+                      f"towards {self.next_station} taking {travel_time} seconds")
                 self.state = TrainState.EN_ROUTE
-                self.arrival_time = current_time + timedelta(seconds=TRAVEL_TIME_BETWEEN_STATIONS)
+                self.travel_time_to_next_station = travel_time
+
+                self.arrival_time = current_time + timedelta(seconds=travel_time)
 
                 self.prev_station = self.current_station
                 self.current_station = None  # No longer "at" the previous station
@@ -79,14 +90,17 @@ class Train:
                 self.state = TrainState.AT_STATION
                 self.arrival_time = None
 
-                # Reverse directions if arrived end station
-                if self.current_station.is_end:
+                # Reverse directions if rotating train
+                if self.current_station.is_end and self.is_rotating_train:
                     print(f"{format_time(current_time)} - {self} arrived at end station, reversing direction.")
                     self.direction *=-1
                     if self.direction == -1:
                         self.remaining_destinations = list(reversed(self.stations_in_line))
                     else:
                         self.remaining_destinations = self.stations_in_line
+                elif self.current_station.is_end:
+                    # Non rotating train -> Tour finished
+                    self.finished_tour = True
 
     def psg_exchange(self,
                      station: SubwayStation, capacity: Optional[int]):
@@ -114,4 +128,9 @@ class Train:
         self.current_station = new_station
         self.state = TrainState.AT_STATION
 
+    def has_finished_tour(self):
+        return self.finished_tour
+
+    def get_travel_time(self):
+        return self.travel_time_to_next_station
 

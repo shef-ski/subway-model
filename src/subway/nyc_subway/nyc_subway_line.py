@@ -1,15 +1,26 @@
 import random
-import time
 from abc import ABC
 from datetime import datetime, timedelta
-from typing import List
+from typing import List, Dict, Tuple
 
 import pandas as pd
 
 from src.subway.abstract_subway_line import AbstractSubwayLine
-from src.subway.generic_subway.generic_subway_line import GenericSubwayLine
 from src.subway.passenger import SubwayPassenger
 from src.subway.subway_station import SubwayStation
+
+
+def build_lookup_key_from_datetime(current_time: datetime) -> Tuple[str, int, int, int]:
+    weekday_index = current_time.weekday()  # Monday = 0, Sunday = 6
+
+    if weekday_index < 5:
+        day_type = "weekday"
+    elif weekday_index == 5:
+        day_type = "saturday"
+    else:
+        day_type = "sunday"
+
+    return day_type, current_time.hour, current_time.minute, current_time.second
 
 
 class NycSubwayLine(AbstractSubwayLine, ABC):
@@ -17,9 +28,13 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
     def __init__(self,
                  name: str,
                  stations: List[SubwayStation],
-                 arriving_passengers_lookup: pd.DataFrame):
+                 arriving_passengers_lookup: pd.DataFrame,
+                 train_spawns: Dict[Tuple[str, int, int, int], SubwayStation],
+                 train_travel_times: Dict[SubwayStation, Dict[int, int]]):
         self.arriving_passengers_lookup = arriving_passengers_lookup
         self.sampled_lookup = {}
+        self.train_spawns = train_spawns
+        self.train_travel_times = train_travel_times
         super().__init__(name, stations)
 
     def sample_arriving_passengers(self, station: SubwayStation, current_time: datetime) -> List[SubwayPassenger]:
@@ -143,3 +158,18 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
             if count > 0
         }
         return datetime_distribution
+
+
+    def get_train_travel_times(self) -> Dict[SubwayStation, Dict[int, int]]:
+        return self.train_travel_times
+
+
+    def check_for_train_spawns(self, current_time: datetime):
+
+        key = build_lookup_key_from_datetime(current_time)
+
+        if key in self.train_spawns:
+            spawning_station = self.train_spawns[key]
+            direction = 1 if spawning_station.id == 0 else -1
+
+            self.add_train(spawning_station, direction, False)
