@@ -10,14 +10,12 @@ from src.utils import format_time
 
 class Train:
 
-    
-
     def __init__(self,
                  train_id: int,
                  stations_in_line: List[SubwayStation],
                  direction: int,
                  is_rotating_train: bool,
-                 capacity = 2500):
+                 capacity = 1200): # make a parameter that we can optimize
 
         self.capacity = capacity
         self.id = train_id
@@ -58,7 +56,7 @@ class Train:
             if self.ready_to_depart_at is None:  # Train just arrived / was deployed
                 # todo the dwell time should not be a constant but a r.v.
 
-                self.ready_to_depart_at = current_time + timedelta(seconds=DWELL_TIME_AT_STATION)
+                self.ready_to_depart_at = current_time + timedelta(seconds=max(DWELL_TIME_AT_STATION, round(len(self.current_station.waiting_passengers)/100)))
 
                 self.remaining_destinations = self.remaining_destinations[1:]
                 self.next_station = self.remaining_destinations[0]
@@ -66,8 +64,22 @@ class Train:
                 # Passengers leave and enter
                 self.psg_exchange(self.current_station, self.capacity)
 
-            if current_time >= self.ready_to_depart_at:  # Depart towards the next station
+            if current_time >= self.ready_to_depart_at and self.check_station_free() == True:  # Depart towards the next station
+                if self.direction == 1:
+                    if self.next_station.is_end:
+                        self.next_station.train_incoming_down()
+                    else:
+                        self.next_station.train_incoming_up()
+                    self.current_station.train_leave_up()
+                else:
+                    if self.next_station.is_end:
+                        self.next_station.train_incoming_up()
+                    else:
+                        self.next_station.train_incoming_down()
+                    self.current_station.train_leave_down()
+
                 travel_time = station_travel_times[self.next_station][self.direction]
+
                 print(f"{format_time(current_time)} - {self} departing from {self.current_station} "
                       f"towards {self.next_station} taking {travel_time} seconds")
                 self.state = TrainState.EN_ROUTE
@@ -128,9 +140,16 @@ class Train:
         self.current_station = new_station
         self.state = TrainState.AT_STATION
 
+    def check_station_free(self):
+        if self.direction == 1:
+            return self.next_station.get_occupation_up() == False
+        else:
+            return self.next_station.get_occupation_down() == False
+
     def has_finished_tour(self):
         return self.finished_tour
 
     def get_travel_time(self):
         return self.travel_time_to_next_station
+
 
