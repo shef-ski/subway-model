@@ -28,6 +28,7 @@ class AbstractSubwayLine(ABC):
 
         # Create new train and raise counter to ensure unique naming
         new_train = Train(self.get_lowest_unused_id(self.trains), self.stations, direction, is_rotating_train)
+
         self.trains.append(new_train)
 
         # Decide whether to queue or to deploy the new train

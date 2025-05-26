@@ -10,11 +10,16 @@ from src.utils import format_time
 
 class Train:
 
-    capacity = 500  # quick assumption, do more research on train capacity
+    
 
     def __init__(self,
-                 train_id: int, stations_in_line: List[SubwayStation], direction: int, is_rotating_train: bool):
+                 train_id: int,
+                 stations_in_line: List[SubwayStation],
+                 direction: int,
+                 is_rotating_train: bool,
+                 capacity = 2500):
 
+        self.capacity = capacity
         self.id = train_id
         self.current_station: Optional[SubwayStation] = None
 
@@ -59,7 +64,7 @@ class Train:
                 self.next_station = self.remaining_destinations[0]
 
                 # Passengers leave and enter
-                self.psg_exchange(self.current_station)
+                self.psg_exchange(self.current_station, self.capacity)
 
             if current_time >= self.ready_to_depart_at:  # Depart towards the next station
                 travel_time = station_travel_times[self.next_station][self.direction]
@@ -98,7 +103,7 @@ class Train:
                     self.finished_tour = True
 
     def psg_exchange(self,
-                     station: SubwayStation):
+                     station: SubwayStation, capacity: Optional[int]):
 
         # --- Disembarking ---
         # current naive assumption: all passengers leaving at one of the remaining stations (flat percentage)
