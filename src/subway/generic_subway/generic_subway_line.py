@@ -1,5 +1,6 @@
 import random
 from abc import ABC
+from datetime import datetime
 from typing import List
 
 from src.subway.abstract_subway_line import AbstractSubwayLine
@@ -21,7 +22,7 @@ class GenericSubwayLine(AbstractSubwayLine, ABC):
 
         super().__init__(name, stations)
 
-    def sample_arriving_passengers(self, station: SubwayStation) -> List[SubwayPassenger]:
+    def sample_arriving_passengers(self, station: SubwayStation, current_time: datetime) -> List[SubwayPassenger]:
         passengers = []
 
         if random.random() < GenericSubwayLine.p_arrival_in_a_second:

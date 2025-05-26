@@ -4,6 +4,7 @@ import matplotlib.animation as animation
 
 from src.constants import TrainState, TRAVEL_TIME_BETWEEN_STATIONS
 from src.simulation import Simulation
+from src.utils import format_time
 
 
 def animate_simulation(sim: Simulation,
@@ -61,7 +62,7 @@ def animate_simulation(sim: Simulation,
             elif train.state == TrainState.EN_ROUTE:
                 # Interpolate position based on time elapsed since departure
                 time_since_departure = sim.current_time - train.previous_departure_time
-                travel_progress = min(1.0, time_since_departure / TRAVEL_TIME_BETWEEN_STATIONS)  # Clamp to max 1.0
+                travel_progress = min(1.0, time_since_departure.total_seconds() / TRAVEL_TIME_BETWEEN_STATIONS)  # Clamp to max 1.0
                 start_station_pos = train.prev_station.id
                 end_station_pos = train.next_station.id
                 x_pos = start_station_pos + (end_station_pos - start_station_pos) * travel_progress
@@ -81,7 +82,7 @@ def animate_simulation(sim: Simulation,
             updates.append(station_n_psg_down[i])
 
         # Update time text
-        time_text.set_text(f'Time: {sim.current_time - 1} s')  # Display time at end of step
+        time_text.set_text(f'Time: {format_time(sim.current_time) }')  # Display time at end of step
         updates.append(time_text)
 
         return updates  # Return list of modified artists for blitting

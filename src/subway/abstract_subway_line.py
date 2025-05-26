@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import List
 
 from src.subway.passenger import SubwayPassenger
@@ -34,7 +35,7 @@ class AbstractSubwayLine(ABC):
             else:
                 self.train_queue.append(new_train)
 
-    def update(self, current_time):
+    def update(self, current_time: datetime):
         """Try to deploy the first queued train, then update all trains and all stations."""
 
         if self.train_queue and self._first_station_is_available():
@@ -45,7 +46,7 @@ class AbstractSubwayLine(ABC):
             train.update(current_time, self.stations)
 
         for station in self.stations:
-            arriving_passengers = self.sample_arriving_passengers(station)
+            arriving_passengers = self.sample_arriving_passengers(station, current_time)
             station.random_psg_arrival(arriving_passengers)
 
     def _first_station_is_available(self):
@@ -62,5 +63,5 @@ class AbstractSubwayLine(ABC):
         return self.stations
 
     @abstractmethod
-    def sample_arriving_passengers(self, station: SubwayStation) -> List[SubwayPassenger]:
+    def sample_arriving_passengers(self, station: SubwayStation, current_time: datetime) -> List[SubwayPassenger]:
         pass
