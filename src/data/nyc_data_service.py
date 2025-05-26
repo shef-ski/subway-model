@@ -38,7 +38,6 @@ class NycDataService:
         print(f"Folder '{name}' exists and contains all required files.")
         return True
 
-
     def load_nyc_line(self, name: str) -> NycSubwayLine:
 
         if not self._line_data_exists(name):
@@ -59,8 +58,8 @@ class NycDataService:
                 station = SubwayStation(station_id=sortorder, is_end=is_end)
                 stations.append(station)
 
-        metadata_file_path = self._get_direction_estimate_path(name)
-        lookup_table = pandas.read_csv(metadata_file_path)
+        lookup_file_path = self._get_direction_estimate_path(name)
+        lookup_table = pandas.read_csv(lookup_file_path)
         train_spawns = self.read_train_spawns(name, stations)
         train_travel_times = self.read_train_travel_times(name, stations)
 
