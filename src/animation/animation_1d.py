@@ -2,16 +2,16 @@ import os
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
-from src.constants import TrainState, TRAVEL_TIME_BETWEEN_STATIONS
+from src.constants import TrainState
 from src.simulation import Simulation
 from src.utils import format_time
 
 
-def animate_simulation(sim: Simulation,
-                       duration_seconds: int,
-                       animation_interval_ms: int,
-                       save_video: bool = False,
-                       output_dir: str = "."):
+def animate_simulation_1d(sim: Simulation,
+                          duration_seconds: int,
+                          animation_interval_ms: int,
+                          save_video: bool = False,
+                          output_dir: str = "."):
 
     line = sim.lines[0]  # Only visualize first line for now
 
@@ -33,7 +33,7 @@ def animate_simulation(sim: Simulation,
                         for s in line.get_stations()]
 
     station_n_psg_down = [ax.text(s.id, 0.3, f'{len(s.get_waiting_psg_down())}', va='center', fontsize=9, color="red")
-                          for s in line.get_stations()]
+                        for s in line.get_stations()]
 
     # --- Update function ---
     def update(frames):
@@ -94,7 +94,7 @@ def animate_simulation(sim: Simulation,
                                   blit=True,  # smoother animation
                                   repeat=False)
 
-    # --- Save or Show animation ---
+    # --- Save xor Show animation ---
     if save_video:
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)  # Create output directory if it doesn't exist
