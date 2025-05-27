@@ -22,6 +22,8 @@ def animate_simulation_2d(sim: Simulation,
     fig, ax = plt.subplots(1, 1, figsize=(14, 14))
 
     if trim_to_square:
+        print("Warning: this setting is bugged and currently only used to" \
+        "view the whole NYC Map")
         map.trim_map_to_stations_square()
         min_plot_lon, max_plot_lon, min_plot_lat, max_plot_lat = map.square_bounds
         ax.set_xlim(min_plot_lon, max_plot_lon)

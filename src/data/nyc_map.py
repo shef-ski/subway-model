@@ -31,14 +31,11 @@ def get_station_coords(target_station_name, stops_path):
 
     # Read the CSV file.
     # We specify dtype for 'location_type' as str to handle empty values consistently.
-    # Pandas might otherwise try to infer numeric types which can be tricky with mixed data.
     df = pd.read_csv(stops_path, dtype={'location_type': str,
                                              'stop_lat': str, 
                                              'stop_lon': str})
 
     # Filter by station name. This comparison is case-sensitive.
-    # If case-insensitivity is needed, you could use:
-    # matched_stations = df[df['stop_name'].str.lower() == target_station_name.lower()]
     matched_stations = df[df['stop_name'] == target_station_name]
 
     if matched_stations.empty:
@@ -50,12 +47,13 @@ def get_station_coords(target_station_name, stops_path):
     # Prioritize entries where location_type is '1' (typically a station)
     stations_with_type_1 = matched_stations[matched_stations['location_type'] == '1']
 
+    # Take the first match with location_type '1'.
+    # If no entry with location_type '1' is found for that name, take the first match
+    # found, regardless of location_type.
+    # This covers cases where a name might only be associated with platforms/stops.
     if not stations_with_type_1.empty:
-        selected_station_row = stations_with_type_1.iloc[0]  # Take the first match with location_type '1'
+        selected_station_row = stations_with_type_1.iloc[0] 
     else:
-        # If no entry with location_type '1' is found for that name,
-        # take the first match found, regardless of location_type.
-        # This covers cases where a name might only be associated with platforms/stops.
         selected_station_row = matched_stations.iloc[0]
 
     # Extract latitude and longitude
@@ -75,6 +73,12 @@ def get_station_coords(target_station_name, stops_path):
  
 
 class NycMap:
+    """
+    A class which holds a NYC Map and the coordinates of the relevant stations.
+    
+    The geo_df is geopandas dataframe which is an extension to a regular pandas df but
+    with geographical information.    
+    """
  
     square_bounds: tuple
     stations_lon: list
@@ -98,18 +102,21 @@ class NycMap:
             self.stations_lat.append(station.lat)
 
     def _handle_crs(self):
-        # Handle the coordinate reference system
+        """Handle the coordinate reference system."""
+
         self.geo_df = self.geo_df.set_crs(epsg=2263, allow_override=True) 
         self.geo_df = self.geo_df.to_crs(epsg=4326)
 
     def trim_map_to_stations_square(self,
                                     buffer=0.005):
         """
-        Trims a GeoDataFrame to a square area encompassing station coordinates plus a buffer.
+        Trims a GeoDataFrame to a square area encompassing station coordinates.
 
         Args:
-            geo_df (gpd.GeoDataFrame): The input map GeoDataFrame (assumed to be in EPSG:4326).
-            buffer (float): Buffer to add around the station extents (in decimal degrees).
+            geo_df (gpd.GeoDataFrame): The input map GeoDataFrame
+                (assumed to be in EPSG:4326).
+            buffer (float): Buffer to add around the station extents
+                (in decimal degrees).
 
         Returns:
             tuple: (gpd.GeoDataFrame, tuple)
