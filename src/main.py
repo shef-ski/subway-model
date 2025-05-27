@@ -6,10 +6,10 @@ from src.subway.generic_subway.generic_subway_line import GenericSubwayLine
 from src.animation import animate_simulation
 
 # Create a simulation
-sim = Simulation(start_time = datetime(2025, 1, 6, 8, 0), time_delta=timedelta(seconds=1))
+sim = Simulation(start_time = datetime(2025, 1, 6, 5, 0), time_delta=timedelta(seconds=1))
 
 nyc_data_service = NycDataService()
-line = nyc_data_service.load_nyc_line("Crosstown")
+line = nyc_data_service.load_nyc_line("Lexington Av")
 #line = GenericSubwayLine("U4", 7)
 # line.add_train()  # only add one train at the beginning, more added dynamically
 
