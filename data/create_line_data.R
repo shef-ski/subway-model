@@ -10,8 +10,8 @@ INPUT_FILE_LINES <- "./MTA_Subway_Stations.csv"
 DIRECTION_ESTIMATES_PATH <- "MTA_Subway_Origin-Destination_Ridership_Estimate__Beginning_2025.csv"
 args <- commandArgs(trailingOnly = TRUE)
 
-selected_route_id = "G"
-selected_line_name = "Crosstown"
+selected_route_id = "6"
+selected_line_name = "Lexington Av"
 
 if(is.null(selected_line_name)){
   stop("Script not called with a line name")
