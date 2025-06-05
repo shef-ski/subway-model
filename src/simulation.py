@@ -8,12 +8,10 @@ class Simulation:
 
     def __init__(self,
                  start_time: datetime,
-                 time_delta: timedelta,
-                 capacity: int = 500):
+                 time_delta: timedelta):
         self.current_time: datetime = start_time  # Simulation time in minutes
         self.start_time: datetime = start_time
         self.timedelta = time_delta
-        self.capacity = capacity
         self.lines = []
 
     def add_line(self, line: AbstractSubwayLine):

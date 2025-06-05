@@ -30,12 +30,14 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
                  stations: List[SubwayStation],
                  arriving_passengers_lookup: pd.DataFrame,
                  train_spawns: Dict[Tuple[str, int, int, int], SubwayStation],
-                 train_travel_times: Dict[SubwayStation, Dict[int, int]]):
+                 train_travel_times: Dict[SubwayStation, Dict[int, int]],
+                 capacity: int):
         self.arriving_passengers_lookup = arriving_passengers_lookup
         self.sampled_lookup = {}
         self.train_spawns = train_spawns
         self.train_travel_times = train_travel_times
-        super().__init__(name, stations)
+        
+        super().__init__(name, stations, capacity)
 
     def sample_arriving_passengers(self, station: SubwayStation, current_time: datetime) -> List[SubwayPassenger]:
 

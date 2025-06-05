@@ -21,9 +21,10 @@ def animate_simulation_2d(sim: Simulation,
     # --- Plot setup ---
     fig, ax = plt.subplots(1, 1, figsize=(14, 14))
 
-    if trim_to_square:
-        print("Warning: this setting is bugged and currently only used to" \
-        "view the whole NYC Map")
+    if not trim_to_square:
+        print("Warning: not trimming to square is bugged and currently only used to" \
+        "view the whole NYC Map. Better to use trim_to_square = True.")
+    else:
         map.trim_map_to_stations_square()
         min_plot_lon, max_plot_lon, min_plot_lat, max_plot_lat = map.square_bounds
         ax.set_xlim(min_plot_lon, max_plot_lon)
@@ -116,7 +117,7 @@ def animate_simulation_2d(sim: Simulation,
                     train_markers[i].set_color('red')
                 else:
                     train_markers[i].set_color('blue')
-                train_psg[i].set_position((x_pos, y_pos))
+                train_psg[i].set_position((x_pos+0.0012, y_pos))
                 train_psg[i].set_text(f"{len(train.passengers)}")
                 updates.append(train_markers[i])
                 #updates.append(train_texts[i])

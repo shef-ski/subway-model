@@ -9,11 +9,12 @@ from src.subway.train import Train
 
 class AbstractSubwayLine(ABC):
 
-    def __init__(self, name: str, stations: List[SubwayStation]):
+    def __init__(self, name: str, stations: List[SubwayStation], capacity: int):
         self.trains = []
         self.train_queue = []  # store trains which are waiting to be deployed
         self.stations = stations
         self.name = name
+        self.capacity = capacity
 
         self.first_station = self.stations[0]
 
@@ -27,7 +28,11 @@ class AbstractSubwayLine(ABC):
     def add_train(self, station: SubwayStation, direction: int, is_rotating_train: bool):
 
         # Create new train and raise counter to ensure unique naming
-        new_train = Train(self.get_lowest_unused_id(self.trains), self.stations, direction, is_rotating_train)
+        new_train = Train(self.get_lowest_unused_id(self.trains),
+                          self.stations,
+                          direction,
+                          is_rotating_train,
+                          capacity=self.capacity)
 
         self.trains.append(new_train)
 

@@ -15,7 +15,7 @@ class Train:
                  stations_in_line: List[SubwayStation],
                  direction: int,
                  is_rotating_train: bool,
-                 capacity = 1200): # make a parameter that we can optimize
+                 capacity: int):
 
         self.capacity = capacity
         self.id = train_id

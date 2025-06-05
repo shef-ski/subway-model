@@ -8,7 +8,8 @@ from src.subway.generic_subway.generic_subway_line import GenericSubwayLine
 from src.animation.animation_1d import animate_simulation_1d
 
 # Create a simulation
-sim = Simulation(start_time = datetime(2025, 1, 6, 8, 0), time_delta=timedelta(seconds=1))
+sim = Simulation(start_time = datetime(2025, 1, 6, 5, 0),
+                 time_delta=timedelta(seconds=1))
 
 # Create a subway line and a corresponding map
 nyc_data_service = NycDataService()

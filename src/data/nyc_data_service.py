@@ -45,7 +45,7 @@ class NycDataService:
         print(f"Folder '{name}' exists and contains all required files.")
         return True
 
-    def load_nyc_line(self, name: str) -> NycSubwayLine:
+    def load_nyc_line(self, name: str, capacity: int = 500) -> NycSubwayLine:
 
         if not self._line_data_exists(name):
             raise ValueError(f"Cannot find data for lane {name}")
@@ -75,7 +75,7 @@ class NycDataService:
         train_spawns = self.read_train_spawns(name, stations)
         train_travel_times = self.read_train_travel_times(name, stations)
 
-        return NycSubwayLine(name, stations, lookup_table, train_spawns, train_travel_times)
+        return NycSubwayLine(name, stations, lookup_table, train_spawns, train_travel_times, capacity)
 
     def _get_metadata_file_path(self, name) -> str:
         folder_path = os.path.join(self.data_path, name)
