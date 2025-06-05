@@ -8,6 +8,7 @@ class SubwayStation:
     def __init__(self,
                  station_id: int,
                  is_end: bool,
+                 name: str = "",
                  lon: float | None = None,
                  lat: float | None = None):
         self.id = station_id
@@ -17,6 +18,7 @@ class SubwayStation:
         self.incoming_train_up = False
         self.incoming_train_down = False
 
+        self.name = name
         self.lon = lon
         self.lat = lat
 

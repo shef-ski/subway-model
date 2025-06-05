@@ -62,6 +62,11 @@ def animate_simulation_2d(sim: Simulation,
                                   f'{len(s.get_waiting_psg_down())}',
                                   va='center', fontsize=9, color="blue")
                                   for s in line.get_stations()]
+    
+    station_names = [ax.text(s.lon+0.001, s.lat,
+                             f'{s.name}',
+                             va='center', fontsize=9, color="black")
+                             for s in line.get_stations()]
 
     plt.tight_layout()
 

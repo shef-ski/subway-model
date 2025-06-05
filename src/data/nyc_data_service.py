@@ -67,7 +67,7 @@ class NycDataService:
                 lon, lat = get_station_coords(stop_name, NycDataService.STOPS_PATH)
 
                 station = SubwayStation(station_id=sortorder, is_end=is_end,
-                                        lon=lon, lat=lat)
+                                        name=stop_name, lon=lon, lat=lat)
                 stations.append(station)
 
         lookup_file_path = self._get_direction_estimate_path(name)
