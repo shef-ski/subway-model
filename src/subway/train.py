@@ -54,7 +54,6 @@ class Train:
         # Train is currently at a station
         if self.state == TrainState.AT_STATION:
             if self.ready_to_depart_at is None:  # Train just arrived / was deployed
-                # todo the dwell time should not be a constant but a r.v.
 
                 self.ready_to_depart_at = current_time + timedelta(seconds=max(DWELL_TIME_AT_STATION, round(len(self.current_station.waiting_passengers)/100)))
 

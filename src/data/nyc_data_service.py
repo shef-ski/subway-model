@@ -6,6 +6,7 @@ from typing import List, Dict, Tuple
 
 import pandas
 
+from src.data.nyc_map import get_station_coords
 from src.subway.nyc_subway.nyc_subway_line import NycSubwayLine
 from src.subway.subway_station import SubwayStation
 
@@ -15,6 +16,12 @@ class NycDataService:
     META_DATA_FILE_NAME = 'line_metadata.csv'
     ESTIMATES_FILE_NAME = 'direction_estimates.csv'
     TRAIN_ARRIVAL_LOOKUP = 'train_arrival_lookup_table.csv'
+
+    # For loading the stops and shape data in the NycMap
+    STOPS_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                 '../../data/line_data/stops.txt'))
+    SHAPE_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__),
+                                 '../../data/nyc_map/CHS_UHF_34_DOHMH_2004.shp'))
 
     def __init__(self):
         self.lane_data = {}
@@ -38,7 +45,6 @@ class NycDataService:
         print(f"Folder '{name}' exists and contains all required files.")
         return True
 
-
     def load_nyc_line(self, name: str) -> NycSubwayLine:
 
         if not self._line_data_exists(name):
@@ -56,11 +62,16 @@ class NycDataService:
             for row in reader:
                 sortorder = int(row['sortorder'])
                 is_end = sortorder == min_sortorder or sortorder == max_sortorder
-                station = SubwayStation(station_id=sortorder, is_end=is_end)
+
+                stop_name = str(row['stop_name'])
+                lon, lat = get_station_coords(stop_name, NycDataService.STOPS_PATH)
+
+                station = SubwayStation(station_id=sortorder, is_end=is_end,
+                                        name=stop_name, lon=lon, lat=lat)
                 stations.append(station)
 
-        metadata_file_path = self._get_direction_estimate_path(name)
-        lookup_table = pandas.read_csv(metadata_file_path)
+        lookup_file_path = self._get_direction_estimate_path(name)
+        lookup_table = pandas.read_csv(lookup_file_path)
         train_spawns = self.read_train_spawns(name, stations)
         train_travel_times = self.read_train_travel_times(name, stations)
 

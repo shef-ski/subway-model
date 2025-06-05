@@ -19,9 +19,9 @@ class Simulation:
     def add_line(self, line: AbstractSubwayLine):
         self.lines.append(line)
 
-    def step(self, capacity):
+    def step(self):
         """Advances the simulation by one time step (1 second)."""
-        self.capacity = capacity
+
         for line in self.lines:
             line.update(self.current_time)
 
