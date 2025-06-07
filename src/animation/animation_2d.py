@@ -61,6 +61,19 @@ def animate_simulation_2d(sim: Simulation,
 
     time_text = ax.text(0.01, 0.90, f'Time: {sim.current_time} s',
                         transform=ax.transAxes)
+
+    event_offset = -0.1
+    for event in sim.events:
+
+        event_station = ""
+        for station in line.stations:
+            if station.id == event.nearest_station_id:
+                event_station = station.name
+
+        ax.text(0.01, 0.96 + event_offset,
+                f'Event: {event.name} at {event.start_time.strftime("%H:%M")} - {event.end_time.strftime("%H:%M")} with {event.expected_ridership} estimated people and nearest station {event_station}',
+                transform=ax.transAxes)
+        event_offset += -0.1
     
     ax.text(0.01, 0.96, f'Line: {line.name}', transform=ax.transAxes)
     

@@ -9,7 +9,7 @@ from src.animation.animation_1d import animate_simulation_1d
 
 # Create a simulation
 
-start_time = datetime(2025, 2, 4, 6, 40)
+start_time = datetime(2025, 2, 4, 6, 0)
 sim = Simulation(start_time = start_time, time_delta=timedelta(seconds=1))
 
 event_start_time = start_time + timedelta(minutes=30)

@@ -14,12 +14,7 @@ from src.subway.subway_station import SubwayStation
 
 
 def event_starts_within_next_hour(current_time: datetime, event: Event) -> bool:
-    event_start_time = event.start_time
-
-    current_hour = current_time.replace(minute=0, second=0, microsecond=0)
-    event_hour = event_start_time.replace(minute=0, second=0, microsecond=0)
-
-    return  event_hour == current_hour + timedelta(hours=1)
+    return event.start_time <= current_time + timedelta(hours=1)
 
 def build_lookup_key_from_datetime(current_time: datetime) -> Tuple[str, int, int, int]:
     weekday_index = current_time.weekday()  # Monday = 0, Sunday = 6
@@ -137,28 +132,30 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
         # key to lookup sampled arrival times
         key = self._lookup_key(current_time, origin, destination)
         if key not in self.sampled_lookup:
-            start_of_hour = current_time.replace(minute=0, second=0, microsecond=0)
             total_people = self.lookup_ridership_for_hour(current_time, origin, destination)
-            self.sampled_lookup[key] = self.generate_arrival_times_for_hour(start_of_hour, round(total_people))
+            self.sampled_lookup[key] = self.generate_arrival_times_for_hour(current_time, current_time + timedelta(hours=1) , round(total_people))
 
         return self.sampled_lookup[key].get(current_time, 0)
 
-
-    def generate_arrival_times_for_hour(self, start_time: datetime, total_people: int) -> dict:
+    def generate_arrival_times_for_hour(self, start_time: datetime, end_time: datetime, total_people: int) -> dict:
         if total_people <= 0:
             return {}
 
-        lambda_sec = total_people / 3600
+
+        # Compute end of the current hour
+        end_of_window = end_time
+        remaining_seconds = (end_of_window - start_time).total_seconds()
+        lambda_sec = total_people / remaining_seconds
 
         distribution = defaultdict(int)
         current_time = start_time
 
-        while current_time < start_time + timedelta(hours=1):
+        while current_time < end_of_window:
             # Sample time until next event
             delta_seconds = np.random.exponential(scale=1 / lambda_sec)
             current_time += timedelta(seconds=delta_seconds)
 
-            if current_time < start_time + timedelta(hours=1):
+            if current_time < end_of_window:
                 # Round to the nearest second
                 rounded_time = current_time.replace(microsecond=0)
                 distribution[rounded_time] += 1
@@ -190,16 +187,14 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
             if key not in self.sampled_event_lookup:
                 # Arriving passengers for event
                 if event_starts_within_next_hour(current_time, event) and event.nearest_station_id == other_station_id:
-                    start_of_hour = current_time.replace(minute=0, second=0, microsecond=0)
                     total_people = round(event.expected_ridership / len(self.stations))
-                    self.sampled_event_lookup[key] = self.generate_arrival_times_for_hour(start_of_hour, total_people)
+                    self.sampled_event_lookup[key] = self.generate_arrival_times_for_hour(current_time, event.start_time , total_people)
 
                 # Passengers leaving after event
                 if event.nearest_station_id == station_id and event.end_time == current_time:
-                    start_of_hour = current_time.replace(minute=0, second=0, microsecond=0)
                     total_people = round(event.expected_ridership / len(self.stations))
                     print(f"adding {total_people} leaving event people for key {key}")
-                    self.sampled_event_lookup[key] = self.generate_arrival_times_for_hour(start_of_hour, total_people)
+                    self.sampled_event_lookup[key] = self.generate_arrival_times_for_hour(current_time, current_time+timedelta(hours=1), total_people)
 
             arrival_dict[event.name] = self.sampled_event_lookup.get(key, {}).get(current_time, 0)
 
