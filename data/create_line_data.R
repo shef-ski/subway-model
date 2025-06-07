@@ -10,8 +10,9 @@ INPUT_FILE_LINES <- "./MTA_Subway_Stations.csv"
 DIRECTION_ESTIMATES_PATH <- "MTA_Subway_Origin-Destination_Ridership_Estimate__Beginning_2025.csv"
 args <- commandArgs(trailingOnly = TRUE)
 
-selected_route_id = "6"
+selected_route_id = "4"
 selected_line_name = "Lexington Av"
+output_folder_name = paste(selected_line_name,"-",selected_route_id, sep = "")
 
 if(is.null(selected_line_name)){
   stop("Script not called with a line name")
@@ -80,9 +81,9 @@ sortorder_complex_lookup <- line_metadata %>%
   select(sortorder, complex_id, stop_id = gtfs_stop_id)
 
 dir.create("line_outputs")
-dir.create(paste("line_outputs",selected_line_name, sep="/"))
+dir.create(paste("line_outputs",output_folder_name, sep="/"))
 
-filename <- paste0("line_outputs/", selected_line_name, "/line_metadata.csv")
+filename <- paste0("line_outputs/", output_folder_name, "/line_metadata.csv")
 write_csv(line_metadata %>% select(stop_name,Line, sortorder), filename)
 
 train_arrival_lookup_table <- stops_for_selected_route %>%
@@ -91,7 +92,7 @@ train_arrival_lookup_table <- stops_for_selected_route %>%
   filter(!is.na(sortorder)) %>%
   select(service_id, direction=direction_id, arrival_time, departure_time, station_id=sortorder)
 
-filename <- paste0("line_outputs/", selected_line_name, "/train_arrival_lookup_table.csv")
+filename <- paste0("line_outputs/", output_folder_name, "/train_arrival_lookup_table.csv")
 write_csv(train_arrival_lookup_table, filename)
 
 # direction_estimates
@@ -111,5 +112,10 @@ filtered_df <- direction_estimates %>%
   rename(destination_sortorder = sortorder) %>%
   select(Year,Month,day_of_week,hour_of_day,origin=origin_sortorder, destination=destination_sortorder, estimated_ridership)
 
-filename <- paste0("line_outputs/", selected_line_name, "/direction_estimates.csv")
+filename <- paste0("line_outputs/", output_folder_name, "/direction_estimates.csv")
 write_csv(filtered_df, filename)
+
+investigate <- filtered_df %>% filter(Year == 2025 & Month == 2 & day_of_week == "Tuesday" & hour_of_day==8 & origin == 3)
+
+
+investigate2 <- direction_estimates %>% filter(Year == 2025 & Month == 2 & day_of_week == "Tuesday" & hour_of_day==8 & origin == 610)

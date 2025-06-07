@@ -5,7 +5,21 @@ import matplotlib.animation as animation
 from src.constants import TrainState
 from src.data.nyc_map import NycMap
 from src.simulation import Simulation
+from src.subway.subway_station import SubwayStation
 from src.utils import format_time
+
+
+def get_waiting_text_up(s: SubwayStation):
+    if len(s.get_waiting_psg_up_event()) > 0:
+        return f"{len(s.get_waiting_psg_up_regular())} + {len(s.get_waiting_psg_up_event())}"
+
+    return f"{len(s.get_waiting_psg_up_regular())}"
+
+def get_waiting_text_down(s: SubwayStation):
+    if len(s.get_waiting_psg_down_event()) > 0:
+        return f"{len(s.get_waiting_psg_down_regular())} + {len(s.get_waiting_psg_down_event())}"
+
+    return f"{len(s.get_waiting_psg_down_regular())}"
 
 
 def animate_simulation_2d(sim: Simulation,
@@ -54,12 +68,13 @@ def animate_simulation_2d(sim: Simulation,
                      for t in line.get_trains()]
     train_psg = [ax.text(0, 0, f'{len(t.passengers)}', va='center', fontsize=9)
                  for t in line.get_trains()]
-    station_n_psg_up = [ax.text(s.lon, s.lat+0.0015, f'{len(s.get_waiting_psg_up())}',
+
+    station_n_psg_up = [ax.text(s.lon, s.lat+0.0015, get_waiting_text_up(s),
                                 va='center', fontsize=9, color="red")
                                 for s in line.get_stations()]
 
     station_n_psg_down = [ax.text(s.lon, s.lat-0.0015,
-                                  f'{len(s.get_waiting_psg_down())}',
+                                  get_waiting_text_down(s),
                                   va='center', fontsize=9, color="blue")
                                   for s in line.get_stations()]
     
@@ -123,8 +138,8 @@ def animate_simulation_2d(sim: Simulation,
                 updates.append(train_psg[i])
 
         for i, station in enumerate(line.get_stations()):
-            station_n_psg_up[i].set_text(f"{len(station.get_waiting_psg_up())}")
-            station_n_psg_down[i].set_text(f"{len(station.get_waiting_psg_down())}")
+            station_n_psg_up[i].set_text(get_waiting_text_up(station))
+            station_n_psg_down[i].set_text(get_waiting_text_down(station))
             updates.append(station_n_psg_up[i])
             updates.append(station_n_psg_down[i])
 

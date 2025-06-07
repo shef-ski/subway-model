@@ -4,21 +4,29 @@ from src.animation.animation_2d import animate_simulation_2d
 from src.data.nyc_data_service import NycDataService
 from src.data.nyc_map import NycMap
 from src.simulation import Simulation
-from src.subway.generic_subway.generic_subway_line import GenericSubwayLine
+from src.subway.event.event import Event
 from src.animation.animation_1d import animate_simulation_1d
 
 # Create a simulation
-sim = Simulation(start_time = datetime(2025, 1, 6, 8, 0), time_delta=timedelta(seconds=1))
+
+start_time = datetime(2025, 2, 4, 6, 40)
+sim = Simulation(start_time = start_time, time_delta=timedelta(seconds=1))
+
+event_start_time = start_time + timedelta(minutes=30)
+event_end_time = event_start_time + timedelta(hours=1)
+
+# Create basic event
+event = Event("show", 5, 3000, event_start_time, event_end_time)
 
 # Create a subway line and a corresponding map
 nyc_data_service = NycDataService()
-line = nyc_data_service.load_nyc_line("Lexington Av")
+line = nyc_data_service.load_nyc_line("Lexington Av-6")
 map = NycMap(NycDataService.SHAPE_PATH, line)
-#line = GenericSubwayLine("U4", 7)
 
 
 # Add the line to the simulation
 sim.add_line(line)
+sim.add_events([event])
 
 # Run with matplotlib visualization
 SIMULATION_DURATION_SECONDS = 160000  # Total simulation time

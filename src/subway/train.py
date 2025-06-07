@@ -79,8 +79,8 @@ class Train:
 
                 travel_time = station_travel_times[self.next_station][self.direction]
 
-                print(f"{format_time(current_time)} - {self} departing from {self.current_station} "
-                      f"towards {self.next_station} taking {travel_time} seconds")
+                #print(f"{format_time(current_time)} - {self} departing from {self.current_station} "
+                      #f"towards {self.next_station} taking {travel_time} seconds")
                 self.state = TrainState.EN_ROUTE
                 self.travel_time_to_next_station = travel_time
 
@@ -95,7 +95,7 @@ class Train:
         if self.state == TrainState.EN_ROUTE:
 
             if current_time >= self.arrival_time:  # Train arrived at a station
-                print(f"{format_time(current_time)} - {self} arrived at {self.next_station}")
+                #print(f"{format_time(current_time)} - {self} arrived at {self.next_station}")
                 self.current_station = self.next_station
                 self.next_station = None
                 self.state = TrainState.AT_STATION
@@ -103,7 +103,7 @@ class Train:
 
                 # Reverse directions if rotating train
                 if self.current_station.is_end and self.is_rotating_train:
-                    print(f"{format_time(current_time)} - {self} arrived at end station, reversing direction.")
+                    #print(f"{format_time(current_time)} - {self} arrived at end station, reversing direction.")
                     self.direction *=-1
                     if self.direction == -1:
                         self.remaining_destinations = list(reversed(self.stations_in_line))

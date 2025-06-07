@@ -5,6 +5,7 @@ from typing import List, Dict
 
 from src.constants import TRAVEL_TIME_BETWEEN_STATIONS
 from src.subway.abstract_subway_line import AbstractSubwayLine
+from src.subway.event.event import Event
 from src.subway.subway_station import SubwayStation
 from src.subway.passenger import SubwayPassenger
 
@@ -30,8 +31,11 @@ class GenericSubwayLine(AbstractSubwayLine, ABC):
 
         super().__init__(name, stations)
 
-    def sample_arriving_passengers(self, station: SubwayStation, current_time: datetime) -> List[SubwayPassenger]:
+    def sample_arriving_passengers(self, station: SubwayStation, current_time: datetime, events: List[Event]) -> List[SubwayPassenger]:
         passengers = []
+
+        if events is not None:
+            print("Events not supported for generic lines")
 
         if random.random() < GenericSubwayLine.p_arrival_in_a_second:
             # A passenger arrives

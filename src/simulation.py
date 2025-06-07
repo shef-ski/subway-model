@@ -1,6 +1,8 @@
 from datetime import datetime, timedelta
+from typing import List
 
 from src.subway.abstract_subway_line import AbstractSubwayLine
+from src.subway.event.event import Event
 
 
 class Simulation:
@@ -15,15 +17,19 @@ class Simulation:
         self.timedelta = time_delta
         self.capacity = capacity
         self.lines = []
+        self.events = []
 
     def add_line(self, line: AbstractSubwayLine):
         self.lines.append(line)
+
+    def add_events(self, events: List[Event]):
+        self.events.extend(events)
 
     def step(self):
         """Advances the simulation by one time step (1 second)."""
 
         for line in self.lines:
-            line.update(self.current_time)
+            line.update(self.current_time, self.events)
 
         # Increment time for the next step
         self.current_time += self.timedelta

@@ -98,6 +98,10 @@ class NycDataService:
             # Adjust to 00: and add one day
             time_obj = datetime.strptime(time_str.replace("25:", "01:", 1), "%H:%M:%S")
             return time_obj + timedelta(days=1)
+        if time_str.startswith("26:"):
+            # Adjust to 00: and add one day
+            time_obj = datetime.strptime(time_str.replace("26:", "02:", 1), "%H:%M:%S")
+            return time_obj + timedelta(days=1)
         return datetime.strptime(time_str, "%H:%M:%S")
 
     def read_train_spawns(self, name: str, stations: List[SubwayStation]) -> Dict[Tuple[str, int, int, int], SubwayStation]:
