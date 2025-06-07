@@ -1,77 +1,9 @@
-import pandas as pd
 import geopandas as gpd
 from shapely.geometry import box
 
 from src.subway.nyc_subway.nyc_subway_line import NycSubwayLine
 
-
-def get_station_coords(target_station_name, stops_path):
-    """
-    Reads a stops.txt (CSV) file, finds a station by its name, and returns 
-    its longitude and latitude as a pair of floats.
-
-    It prioritizes entries with location_type=1 (typically representing a station)
-    if multiple matches for the name exist.
-
-    Args:
-        target_station_name (str): The name of the station to search for.
-        stops_path (str): The path to the stops.txt file.
-
-    Returns:
-        tuple: A tuple (longitude, latitude) as floats if the station is found 
-               and coordinates are valid.
-               Returns None if the station is not found, the file is not found,
-               or if coordinates are missing/invalid.
-    """
-
-    # terrible hard coded fix because there are 2 stations named "Fulton St"
-    if target_station_name == "Fulton St":
-        print("Warning: hardcoded fix being applied")
-        return -73.975375, 40.687119 
-
-    # Read the CSV file.
-    # We specify dtype for 'location_type' as str to handle empty values consistently.
-    df = pd.read_csv(stops_path, dtype={'location_type': str,
-                                             'stop_lat': str, 
-                                             'stop_lon': str})
-
-    # Filter by station name. This comparison is case-sensitive.
-    matched_stations = df[df['stop_name'] == target_station_name]
-
-    if matched_stations.empty:
-        print(f"Station '{target_station_name}' not found in the file.")
-        return None
-
-    selected_station_row = None
-
-    # Prioritize entries where location_type is '1' (typically a station)
-    stations_with_type_1 = matched_stations[matched_stations['location_type'] == '1']
-
-    # Take the first match with location_type '1'.
-    # If no entry with location_type '1' is found for that name, take the first match
-    # found, regardless of location_type.
-    # This covers cases where a name might only be associated with platforms/stops.
-    if not stations_with_type_1.empty:
-        selected_station_row = stations_with_type_1.iloc[0] 
-    else:
-        selected_station_row = matched_stations.iloc[0]
-
-    # Extract latitude and longitude
-    stop_lon_str = selected_station_row['stop_lon']
-    stop_lat_str = selected_station_row['stop_lat']
-
-    # Convert to float. Handle potential empty strings or non-numeric values.
-    if pd.isna(stop_lon_str) or str(stop_lon_str).strip() == "":
-        raise ValueError("Longitude is missing or empty.")
-    if pd.isna(stop_lat_str) or str(stop_lat_str).strip() == "":
-        raise ValueError("Latitude is missing or empty.")
-        
-    stop_lon = float(stop_lon_str)
-    stop_lat = float(stop_lat_str)
-    
-    return stop_lon, stop_lat
  
-
 class NycMap:
     """
     A class which holds a NYC Map and the coordinates of the relevant stations.

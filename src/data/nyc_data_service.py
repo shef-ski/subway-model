@@ -6,7 +6,6 @@ from typing import List, Dict, Tuple
 
 import pandas
 
-from src.data.nyc_map import get_station_coords
 from src.subway.nyc_subway.nyc_subway_line import NycSubwayLine
 from src.subway.subway_station import SubwayStation
 
@@ -64,7 +63,7 @@ class NycDataService:
                 is_end = sortorder == min_sortorder or sortorder == max_sortorder
 
                 stop_name = str(row['stop_name'])
-                lon, lat = get_station_coords(stop_name, NycDataService.STOPS_PATH)
+                lon, lat = float(row['stop_lon']), float(row['stop_lat'])
 
                 station = SubwayStation(station_id=sortorder, is_end=is_end,
                                         name=stop_name, lon=lon, lat=lat)
