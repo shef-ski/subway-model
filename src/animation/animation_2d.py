@@ -129,7 +129,7 @@ def animate_simulation_2d(sim: Simulation,
                 time_since_departure = sim.current_time - train.previous_departure_time
                 travel_progress = min(1.0, time_since_departure.total_seconds() /
                                       train.get_travel_time())
-                
+
                 start_x = train.prev_station.lon
                 start_y = train.prev_station.lat
 
@@ -141,7 +141,9 @@ def animate_simulation_2d(sim: Simulation,
 
             if x_pos is not None:
                 train_markers[i].set_data([x_pos], [y_pos])
-                if train.pct_utilized >= 0.99:
+                if train.is_broken:
+                    train_markers[i].set_color('brown')
+                elif train.pct_utilized >= 0.99:
                     train_markers[i].set_color('yellow')
                 elif train.direction == 1:
                     train_markers[i].set_color('red')
