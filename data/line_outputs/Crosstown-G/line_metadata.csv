@@ -1,0 +1,13 @@
+stop_name,Line,sortorder,gtfs_stop_id,stop_lat,stop_lon
+Court Sq,Crosstown,0,G22,40.746554,-73.943832
+21 St,Crosstown,1,G24,40.744065,-73.949724
+Greenpoint Av,Crosstown,2,G26,40.731352,-73.954449
+Nassau Av,Crosstown,3,G28,40.724635,-73.951277
+Metropolitan Av,Crosstown,4,G29,40.712792,-73.951418
+Broadway,Crosstown,5,G30,40.706092,-73.950308
+Flushing Av,Crosstown,6,G31,40.700377,-73.950234
+Myrtle-Willoughby Avs,Crosstown,7,G32,40.694568,-73.949046
+Bedford-Nostrand Avs,Crosstown,8,G33,40.689627,-73.953522
+Classon Av,Crosstown,9,G34,40.688873,-73.96007
+Clinton-Washington Avs,Crosstown,10,G35,40.688089,-73.966839
+Fulton St,Crosstown,11,G36,40.687119,-73.975375

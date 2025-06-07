@@ -10,8 +10,8 @@ INPUT_FILE_LINES <- "./MTA_Subway_Stations.csv"
 DIRECTION_ESTIMATES_PATH <- "MTA_Subway_Origin-Destination_Ridership_Estimate__Beginning_2025.csv"
 args <- commandArgs(trailingOnly = TRUE)
 
-selected_route_id = "4"
-selected_line_name = "Lexington Av"
+selected_route_id = "G"
+selected_line_name = "Crosstown"
 output_folder_name = paste(selected_line_name,"-",selected_route_id, sep = "")
 
 if(is.null(selected_line_name)){
@@ -75,7 +75,7 @@ complex_stations <- ordered_stops  %>%
 
 line_metadata <- complex_stations %>%
   mutate(sortorder = sortorder - min(sortorder, na.rm = TRUE)) %>%
-  select(stop_name,Line, sortorder, complex_id, gtfs_stop_id)
+  select(stop_name,Line, sortorder, complex_id, gtfs_stop_id, stop_lat, stop_lon)
 
 sortorder_complex_lookup <- line_metadata %>%
   select(sortorder, complex_id, stop_id = gtfs_stop_id)
@@ -84,7 +84,7 @@ dir.create("line_outputs")
 dir.create(paste("line_outputs",output_folder_name, sep="/"))
 
 filename <- paste0("line_outputs/", output_folder_name, "/line_metadata.csv")
-write_csv(line_metadata %>% select(stop_name,Line, sortorder), filename)
+write_csv(line_metadata %>% select(stop_name,Line, sortorder, gtfs_stop_id , stop_lat, stop_lon), filename)
 
 train_arrival_lookup_table <- stops_for_selected_route %>%
   left_join(sortorder_complex_lookup, by="stop_id") %>%
