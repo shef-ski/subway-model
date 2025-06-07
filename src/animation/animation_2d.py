@@ -79,9 +79,9 @@ def animate_simulation_2d(sim: Simulation,
     ax.text(0.01, 0.96, f'Line: {line.name}', transform=ax.transAxes)
     
     train_markers = [ax.plot(0, 0, 's', markersize=10, color='lightgreen')[0]
-                     for t in line.get_trains()]
+                             for t in line.get_trains()]
     train_psg = [ax.text(0, 0, f'{len(t.passengers)}', va='center', fontsize=9)
-                 for t in line.get_trains()]
+                         for t in line.get_trains()]
 
     station_n_psg_up = [ax.text(s.lon, s.lat+0.0015, get_waiting_text_up(s),
                                 va='center', fontsize=9, color="red")
@@ -141,7 +141,9 @@ def animate_simulation_2d(sim: Simulation,
 
             if x_pos is not None:
                 train_markers[i].set_data([x_pos], [y_pos])
-                if train.direction == 1:
+                if train.pct_utilized >= 0.99:
+                    train_markers[i].set_color('yellow')
+                elif train.direction == 1:
                     train_markers[i].set_color('red')
                 else:
                     train_markers[i].set_color('blue')
