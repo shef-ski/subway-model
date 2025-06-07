@@ -1,11 +1,15 @@
 from datetime import timedelta, datetime
+import random
 
+from src.animation.animation_1d import animate_simulation_1d
 from src.animation.animation_2d import animate_simulation_2d
 from src.data.nyc_data_service import NycDataService
 from src.data.nyc_map import NycMap
 from src.simulation import Simulation
 from src.subway.event.event import Event
-from src.animation.animation_1d import animate_simulation_1d
+
+seed = 12345
+random.seed(seed)
 
 # Create a simulation
 start_time = datetime(2025, 2, 4, 6, 0)
@@ -19,18 +23,18 @@ map = NycMap(NycDataService.SHAPE_PATH, line)
 # Add the line to the simulation
 sim.add_line(line)
 
-# OPTIONAL: Add times [t] at which a random train breaks
+# OPTIONAL: Add times [t1, t2, ...] at which a (pseudo-)random train breaks
 train_breaking_times = []
 train_breaking_times.append(start_time + timedelta(minutes=45))
-train_breaking_times.append(start_time + timedelta(minutes=60))
-
-
+train_breaking_times.append(start_time + timedelta(minutes=62))
+train_breaking_times.append(start_time + timedelta(minutes=70))
+sim.add_breaking_times(train_breaking_times)
 
 # OPTIONAL: Create basic event which temporarily increases ridership
 event_start_time = start_time + timedelta(minutes=30)
 event_end_time = event_start_time + timedelta(hours=1)
 event = Event("show", 5, 3000, event_start_time, event_end_time)
-sim.add_events([event])
+#sim.add_events([event])
 
 # Run with matplotlib visualization
 SIMULATION_DURATION_SECONDS = 160000  # Total simulation time

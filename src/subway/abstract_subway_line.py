@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import List, Dict
+import random
 
 from src.subway.event.event import Event
 from src.subway.passenger import SubwayPassenger
@@ -9,6 +10,8 @@ from src.subway.train import Train
 
 
 class AbstractSubwayLine(ABC):
+    trains: List[Train]
+    train_queue: List[Train]
 
     def __init__(self, name: str, stations: List[SubwayStation], capacity: int):
         self.trains = []
@@ -46,11 +49,17 @@ class AbstractSubwayLine(ABC):
             else:
                 self.train_queue.append(new_train)
 
-    def update(self, current_time: datetime, events: List[Event]):
+    def update(self,
+               current_time: datetime,
+               events: List[Event],
+               breaking_times: List[datetime]):
         """Try to deploy the first queued train, then update all trains and all stations."""
 
         self.check_for_train_spawns(current_time)
         self.remove_trains_that_reached_end()
+        
+        if breaking_times:
+            self._check_if_train_breaks(current_time, breaking_times)
 
         if self.train_queue and self._first_station_is_available():
             deployed_train = self.train_queue.pop(0)
@@ -62,6 +71,16 @@ class AbstractSubwayLine(ABC):
         for station in self.stations:
             arriving_passengers = self.sample_arriving_passengers(station, current_time, events)
             station.random_psg_arrival(arriving_passengers)
+
+    def _check_if_train_breaks(self,
+                               current_time: datetime,
+                               breaking_times: List[datetime]):
+        if current_time >= breaking_times[0]:
+            # Select a (pseudo-)random train which breaks
+            broken_train = random.choice(self.trains)
+            broken_train.is_broken = True
+            breaking_times.pop(0)
+            print(f"Train with id {broken_train.id} broke!")
 
     def _first_station_is_available(self):
         for train in self.trains:
