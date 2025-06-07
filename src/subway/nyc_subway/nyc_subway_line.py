@@ -1,14 +1,20 @@
 import random
 from abc import ABC
+from collections import defaultdict
 from datetime import datetime, timedelta
 from typing import List, Dict, Tuple
 
+import numpy as np
 import pandas as pd
 
 from src.subway.abstract_subway_line import AbstractSubwayLine
+from src.subway.event.event import Event
 from src.subway.passenger import SubwayPassenger
 from src.subway.subway_station import SubwayStation
 
+
+def event_starts_within_next_hour(current_time: datetime, event: Event) -> bool:
+    return event.start_time <= current_time + timedelta(hours=1)
 
 def build_lookup_key_from_datetime(current_time: datetime) -> Tuple[str, int, int, int]:
     weekday_index = current_time.weekday()  # Monday = 0, Sunday = 6
@@ -34,12 +40,20 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
                  capacity: int):
         self.arriving_passengers_lookup = arriving_passengers_lookup
         self.sampled_lookup = {}
+        self.sampled_event_lookup = {}
         self.train_spawns = train_spawns
         self.train_travel_times = train_travel_times
         
         super().__init__(name, stations, capacity)
 
-    def sample_arriving_passengers(self, station: SubwayStation, current_time: datetime) -> List[SubwayPassenger]:
+    def distribute_event_passengers_uniform_dict(self, stations, total_passengers):
+        n = len(stations)
+        probs = np.ones(n) / n
+        passenger_counts = np.random.multinomial(total_passengers, probs)
+
+        return dict(zip(stations, passenger_counts))
+
+    def sample_arriving_passengers(self, station: SubwayStation, current_time: datetime, events: List[Event]) -> List[SubwayPassenger]:
 
         stations_excluding_self = [s for s in self.stations if s.id != station.id]
 
@@ -48,6 +62,17 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
         self._clean_old_entries(current_time)
         for other_station in stations_excluding_self:
             estimated_ridership = self.get_arrivals_for_current_time(current_time, station.id, other_station.id)
+            estimated_ridership_event = self.get_arrivals_for_events(current_time, station.id, other_station.id, events)
+
+            for key, value in estimated_ridership_event.items():
+                for i in range(1, value + 1):
+                    current_index = self.stations.index(station)
+                    destination_index = self.stations.index(other_station)
+
+                    direction = 1 if destination_index > current_index else -1
+
+                    passenger = SubwayPassenger(entry_id=station.id, leave_id=other_station.id, direction=direction, event_name=key)
+                    passengers.append(passenger)
 
             for i in range(1, round(estimated_ridership) + 1):
                 current_index = self.stations.index(station)
@@ -66,13 +91,26 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
             key for key in self.sampled_lookup
             if datetime(key[0], key[1], key[2]).replace(hour=key[3]) < now.replace(minute=0, second=0, microsecond=0)
         ]
+
+        event_keys_to_delete = [
+            key for key in self.sampled_event_lookup
+            if datetime(key[0], key[1], key[2]).replace(hour=key[3]) < now.replace(minute=0, second=0, microsecond=0)
+        ]
+
         for key in keys_to_delete:
-            print(f"cleaned entry {key}")
             del self.sampled_lookup[key]
+
+        for key in event_keys_to_delete:
+            del self.sampled_event_lookup[key]
 
     @staticmethod
     def _lookup_key(dt: datetime, origin, destination):
         return dt.year, dt.month, dt.day, dt.hour , origin, destination
+
+
+    @staticmethod
+    def _event_lookup_key(dt: datetime, event_name, origin, destination):
+        return dt.year, dt.month, dt.day, dt.hour, event_name, origin, destination
 
     def lookup_ridership_for_hour(self, current_time: datetime, origin, destination):
         df = self.arriving_passengers_lookup
@@ -96,70 +134,35 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
         # key to lookup sampled arrival times
         key = self._lookup_key(current_time, origin, destination)
         if key not in self.sampled_lookup:
-            start_of_hour = current_time.replace(minute=0, second=0, microsecond=0)
             total_people = self.lookup_ridership_for_hour(current_time, origin, destination)
-            self.sampled_lookup[key] = self.generate_arrival_times_for_hour(start_of_hour, round(total_people), 0.3)
+            self.sampled_lookup[key] = self.generate_arrival_times_for_hour(current_time, current_time + timedelta(hours=1) , round(total_people))
 
         return self.sampled_lookup[key].get(current_time, 0)
 
-
-    def generate_arrival_times_for_hour(self, start_time: datetime, total_people: int, randomness: float = 0.1) -> dict:
-
-        ## Given the total people for this hour we generate randomly distributd arrival timestamps within this hour
-        total_seconds = 3600
+    def generate_arrival_times_for_hour(self, start_time: datetime, end_time: datetime, total_people: int) -> dict:
         if total_people <= 0:
             return {}
 
-        # Special case: very small counts (e.g. 1–3 people)
-        if total_people <= 3:
-            result = {}
-            for _ in range(total_people):
-                sec_offset = random.randint(0, total_seconds - 1)
-                dt = start_time + timedelta(seconds=sec_offset)
-                result[dt] = result.get(dt, 0) + 1
-            return result
 
-        base = total_people // total_seconds
-        remainder = total_people % total_seconds
+        # Compute end of the current hour
+        end_of_window = end_time
+        remaining_seconds = (end_of_window - start_time).total_seconds()
+        lambda_sec = total_people / remaining_seconds
 
-        distribution = [base] * total_seconds
+        distribution = defaultdict(int)
+        current_time = start_time
 
-        # Distribute remainder randomly
-        for _ in range(remainder):
-            i = random.randint(0, total_seconds - 1)
-            distribution[i] += 1
+        while current_time < end_of_window:
+            # Sample time until next event
+            delta_seconds = np.random.exponential(scale=1 / lambda_sec)
+            current_time += timedelta(seconds=delta_seconds)
 
-        # small noise
-        swaps = int(total_people * randomness)
+            if current_time < end_of_window:
+                # Round to the nearest second
+                rounded_time = current_time.replace(microsecond=0)
+                distribution[rounded_time] += 1
 
-        # Find all indices with non-zero counts (candidates to take from)
-        nonzero_indices = [i for i, count in enumerate(distribution) if count > 0]
-
-        for _ in range(swaps):
-            if not nonzero_indices:
-                break
-
-            from_i = random.choice(nonzero_indices)
-
-            # Bias: try to move to a bin that already has people (more likely to create spikes)
-            weighted_indices = [i for i, count in enumerate(distribution) if count > 0]
-            # fallback if no weighted candidate
-            if not weighted_indices:
-                to_i = random.randint(0, total_seconds - 1)
-            else:
-                to_i = random.choice(weighted_indices)
-
-            if distribution[from_i] > 0 and from_i != to_i:
-                distribution[from_i] -= 1
-                distribution[to_i] += 1
-
-        # Build datetime → count mapping
-        datetime_distribution = {
-            start_time + timedelta(seconds=i): count
-            for i, count in enumerate(distribution)
-            if count > 0
-        }
-        return datetime_distribution
+        return dict(distribution)
 
 
     def get_train_travel_times(self) -> Dict[SubwayStation, Dict[int, int]]:
@@ -175,3 +178,26 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
             direction = 1 if spawning_station.id == 0 else -1
 
             self.add_train(spawning_station, direction, False)
+
+    def get_arrivals_for_events(self, current_time: datetime, station_id: int, other_station_id: int, events: List[Event]) -> Dict[str, int]:
+
+        arrival_dict = {}
+
+        for event in events:
+
+            key = self._event_lookup_key(current_time, event.name, station_id, other_station_id)
+            if key not in self.sampled_event_lookup:
+                # Arriving passengers for event
+                if event_starts_within_next_hour(current_time, event) and event.nearest_station_id == other_station_id:
+                    total_people = round(event.expected_ridership / len(self.stations))
+                    self.sampled_event_lookup[key] = self.generate_arrival_times_for_hour(current_time, event.start_time , total_people)
+
+                # Passengers leaving after event
+                if event.nearest_station_id == station_id and event.end_time == current_time:
+                    total_people = round(event.expected_ridership / len(self.stations))
+                    print(f"adding {total_people} leaving event people for key {key}")
+                    self.sampled_event_lookup[key] = self.generate_arrival_times_for_hour(current_time, current_time+timedelta(hours=1), total_people)
+
+            arrival_dict[event.name] = self.sampled_event_lookup.get(key, {}).get(current_time, 0)
+
+        return arrival_dict

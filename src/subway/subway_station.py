@@ -39,6 +39,19 @@ class SubwayStation:
 
     def get_waiting_psg_down(self) -> List[SubwayPassenger]:
         return [passenger for passenger in self.waiting_passengers if passenger.direction == -1]
+
+    def get_waiting_psg_up_regular(self) -> List[SubwayPassenger]:
+        return [passenger for passenger in self.waiting_passengers if passenger.direction == 1 and passenger.event_name is None]
+
+    def get_waiting_psg_down_regular(self) -> List[SubwayPassenger]:
+        return [passenger for passenger in self.waiting_passengers if passenger.direction == -1 and passenger.event_name is None]
+
+    def get_waiting_psg_up_event(self) -> List[SubwayPassenger]:
+        return [passenger for passenger in self.waiting_passengers if passenger.direction == 1 and passenger.event_name is not None]
+
+    def get_waiting_psg_down_event(self) -> List[SubwayPassenger]:
+        return [passenger for passenger in self.waiting_passengers if passenger.direction == -1 and passenger.event_name is not None]
+
     def get_occupation_up(self):
         return self.incoming_train_up
     def train_incoming_up(self):
