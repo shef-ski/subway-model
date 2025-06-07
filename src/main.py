@@ -8,24 +8,28 @@ from src.subway.event.event import Event
 from src.animation.animation_1d import animate_simulation_1d
 
 # Create a simulation
-
 start_time = datetime(2025, 2, 4, 6, 0)
 sim = Simulation(start_time = start_time, time_delta=timedelta(seconds=1))
-
-event_start_time = start_time + timedelta(minutes=30)
-event_end_time = event_start_time + timedelta(hours=1)
-
-# Create basic event
-event = Event("show", 5, 3000, event_start_time, event_end_time)
 
 # Create a subway line and a corresponding map
 nyc_data_service = NycDataService()
 line = nyc_data_service.load_nyc_line("Lexington Av-6")
 map = NycMap(NycDataService.SHAPE_PATH, line)
 
-
 # Add the line to the simulation
 sim.add_line(line)
+
+# OPTIONAL: Add times [t] at which a random train breaks
+train_breaking_times = []
+train_breaking_times.append(start_time + timedelta(minutes=45))
+train_breaking_times.append(start_time + timedelta(minutes=60))
+
+
+
+# OPTIONAL: Create basic event which temporarily increases ridership
+event_start_time = start_time + timedelta(minutes=30)
+event_end_time = event_start_time + timedelta(hours=1)
+event = Event("show", 5, 3000, event_start_time, event_end_time)
 sim.add_events([event])
 
 # Run with matplotlib visualization
