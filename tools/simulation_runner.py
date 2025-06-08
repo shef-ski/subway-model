@@ -1,85 +1,113 @@
+from datetime import datetime, timedelta
+import numpy as np
+import pandas as pd
+
+from src.data.nyc_data_service import NycDataService
 from src.simulation import Simulation
 
 
 class SimulationRunner:
     """Runs a number of simulations and creates outputs."""
 
+    # nested dict = {capacity1: {run1: val1}, {run2: val2}, capacity2: ...}
+    average_util_rates: dict
+
+    # dict = {capacity1: [val1, val2, ...], capacity2: [val1, val2, ...], ...}
+    all_util_rates: dict
+
+    # dict = {capacity1: [val1, val2, ...], capacity2: [val1, val2, ...], ...} 
+    all_travel_times: dict
+
+    def __init__(self,
+                 n_runs: int,
+                 duration: int,
+                 capacities: list,
+                 start_time: datetime,
+                 time_delta: timedelta,
+                 line_name: str):
+        self.n_runs = n_runs
+        self.duration = duration
+        self.capacities = capacities
+        self.start_time = start_time
+        self.time_delta = time_delta
+        self.line_name = line_name
     
-    outputs: dict
 
-    def __init__(self, ):
+    def run_simulations(self,
+                        list_breaking_times: list,
+                        list_events: list):
+        
+        print(f"\nRunning {self.n_runs * len(self.capacities)} simulations each with {self.duration} seconds.")
+        if list_breaking_times:
+            print(f"Breaking times: {list_breaking_times}")
+        if list_events:
+            print(f"Events at: {[e.start_time for e in list_events]}")
+
+        self.average_util_rates = {}
+        self.all_util_rates = {}
+        self.all_travel_times = {}
+
+        for capacity in self.capacities:
+
+            average_utilization_rates = {}
+
+            for run_idx in range(1, self.n_runs + 1):
+                print(f"\nSimulation for capacity {capacity}, run number {run_idx}/{self.n_runs}.")
+
+                # Create a NYC simulation and a line
+                sim = Simulation(self.start_time, self.time_delta)
+                nyc_data_service = NycDataService()
+                line = nyc_data_service.load_nyc_line(self.line_name, capacity)
+                sim.add_line(line)
+
+                if list_breaking_times:
+                    sim.add_breaking_times(list_breaking_times)
+                if list_events:
+                    sim.add_events(list_events)
+
+                # Add empty data containers
+                total_utilization = 0
+                total_trains = 0
+                all_train_util_vals = []
+
+                # Run the simulation and store data
+                for _ in range(self.duration):
+                    sim.step()
+                    for line in sim.lines:
+                        for train in line.get_trains():
+                            total_utilization += train.pct_utilized
+                            total_trains += 1
+
+                            all_train_util_vals.append(train.pct_utilized)
+
+                # Update the data for average utilization rates in a run
+                average_utilization_rates[run_idx] = total_utilization / total_trains
+
+                # Update the data for all utilizations rates (of all runs for the capacity)
+                if capacity in self.all_util_rates:
+                    self.all_util_rates[capacity] += all_train_util_vals
+                else:
+                    self.all_util_rates[capacity] = all_train_util_vals
+
+                # Same for passenger travel times
+                if capacity in self.all_travel_times:
+                    self.all_travel_times[capacity] += sim.all_passenger_travel_times
+                else:
+                    self.all_travel_times[capacity] = sim.all_passenger_travel_times
+
+            
+            self.average_util_rates[capacity] = average_utilization_rates
+
+
+    def save_outputs_to_csv(self, path):
+        # todo
 
         pass
 
+    @property
+    def df_avg_util_rates(self):
+        if not self.average_util_rates:
+            raise ValueError("No simulations have been run.")
 
-    def run_simulations(self, n_runs: int, duration: int):
+        return pd.DataFrame(self.average_util_rates)
 
-
-
-        # todo save the outputs in some form to the object
-        self.outputs = {}
-
-        pass
-
-
-
-
-# todo move to the class
-def calculate_average_utilization(sim: Simulation, duration: int):
-    total_utilization = 0
-    total_trains = 0
-
-    train_util_datapoints = []
-
-    for _ in range(duration):
-        sim.step()  
-        for line in sim.lines:
-            for train in line.get_trains():
-                total_utilization += train.pct_utilized
-                total_trains += 1
-                train_util_datapoints.append(train.pct_utilized)
-
-    # Avoid division by zero
-    if total_trains == 0:
-        return 0
-
-    return total_utilization / total_trains, train_util_datapoints
-
-# todo move to the class
-def run_simulations(n=5, duration=3600, capacity=500):
-    """
-    Runs `n` simulations of a subway line and calculates average utilization.
-
-    Parameters:
-    - n (int): Number of simulations to run.
-    - duration (int): Duration of each simulation in seconds.
-    - capacity (int): Capacity of the train (used in utilization calculation).
-
-    Returns:
-    - dict: A dictionary mapping simulation number to average utilization rate.
-    """
-    average_utilization_rates = {}
-
-    for i in range(1, n + 1):
-        # Create and configure the simulation
-        #sim = Simulation()
-        #line = GenericSubwayLine("U4", 7)  # Customize or extend as needed
-        #sim.add_line(line)
-
-        sim = Simulation(start_time=datetime(2025, 1, 6, 8, 0),
-                         time_delta=timedelta(seconds=1))
-
-        # Create a subway line and a corresponding map
-        nyc_data_service = NycDataService()
-        line = nyc_data_service.load_nyc_line("Lexington Av", capacity)
-        sim.add_line(line)
-
-
-        # Run the simulation and calculate utilization
-        avg_utilization, train_util_datapoints = calculate_average_utilization(sim, duration)
-        average_utilization_rates[i] = avg_utilization
-
-        # Print the result
-        print(f"Average utilization in Simulation {i} with capacity {capacity}: {avg_utilization * 100:.2f}%")
-
-    return average_utilization_rates, train_util_datapoints
