@@ -11,12 +11,15 @@ class Simulation:
     def __init__(self,
                  start_time: datetime,
                  time_delta: timedelta):
-        self.current_time: datetime = start_time  # Simulation time in minutes
+        self.current_time: datetime = start_time
         self.start_time: datetime = start_time
         self.timedelta = time_delta
         self.lines = []
         self.events = []
         self.breaking_times = []
+
+        # Stores the waiting times of all passengers in seconds
+        self.all_passenger_travel_times = []
 
     def add_line(self, line: AbstractSubwayLine):
         self.lines.append(line)
@@ -31,7 +34,10 @@ class Simulation:
         """Advances the simulation by one time step (1 second)."""
 
         for line in self.lines:
-            line.update(self.current_time, self.events, self.breaking_times)
+            travel_times = line.update(self.current_time, self.events, self.breaking_times)
+
+            if travel_times:
+                self.all_passenger_travel_times += travel_times
 
         # Increment time for the next step
         self.current_time += self.timedelta

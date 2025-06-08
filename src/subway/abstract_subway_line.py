@@ -52,8 +52,13 @@ class AbstractSubwayLine(ABC):
     def update(self,
                current_time: datetime,
                events: List[Event],
-               breaking_times: List[datetime]):
-        """Try to deploy the first queued train, then update all trains and all stations."""
+               breaking_times: List[datetime]) -> List[float]:
+        
+        """Try to deploy the first queued train, then update all trains and all stations.
+        
+        Returns the list of all travel times of those passengers who disembarked
+        """
+        travel_times = []
 
         self.check_for_train_spawns(current_time)
         self.remove_trains_that_reached_end()
@@ -66,11 +71,13 @@ class AbstractSubwayLine(ABC):
             deployed_train.set_current_station(self.first_station)
 
         for train in self.trains:
-            train.update(current_time, self.get_train_travel_times())
+            travel_times += train.update(current_time, self.get_train_travel_times())
 
         for station in self.stations:
             arriving_passengers = self.sample_arriving_passengers(station, current_time, events)
             station.random_psg_arrival(arriving_passengers)
+
+        return travel_times
 
     def _check_if_train_breaks(self,
                                current_time: datetime,

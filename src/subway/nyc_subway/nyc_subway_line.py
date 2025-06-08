@@ -71,7 +71,12 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
 
                     direction = 1 if destination_index > current_index else -1
 
-                    passenger = SubwayPassenger(entry_id=station.id, leave_id=other_station.id, direction=direction, event_name=key)
+                    passenger = SubwayPassenger(entry_id=station.id,
+                                                leave_id=other_station.id,
+                                                direction=direction,
+                                                spawn_time=current_time,
+                                                event_name=key
+                                                )
                     passengers.append(passenger)
 
             for i in range(1, round(estimated_ridership) + 1):
@@ -80,7 +85,10 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
 
                 direction = 1 if destination_index > current_index else -1
 
-                passenger = SubwayPassenger(entry_id=station.id, leave_id=other_station.id, direction=direction)
+                passenger = SubwayPassenger(entry_id=station.id,
+                                            leave_id=other_station.id,
+                                            direction=direction,
+                                            spawn_time=current_time)
                 passengers.append(passenger)
 
         return passengers
