@@ -6,6 +6,7 @@ from src.data.nyc_map import NycMap
 from src.simulation import Simulation
 from src.subway.event.event import Event
 from src.animation.animation_1d import animate_simulation_1d
+from src.subway.delay.delay import Delay
 
 # Create a simulation
 
@@ -18,6 +19,12 @@ event_end_time = event_start_time + timedelta(hours=1)
 # Create basic event
 event = Event("show", 5, 3000, event_start_time, event_end_time)
 
+delay_start_time = start_time + timedelta(minutes=10)
+delay_end_time = delay_start_time + timedelta(minutes=10)
+
+# Create delay
+delay = Delay("coffee", 5, delay_start_time, delay_end_time)
+
 # Create a subway line and a corresponding map
 nyc_data_service = NycDataService()
 line = nyc_data_service.load_nyc_line("Lexington Av-6")
@@ -27,6 +34,7 @@ map = NycMap(NycDataService.SHAPE_PATH, line)
 # Add the line to the simulation
 sim.add_line(line)
 sim.add_events([event])
+sim.add_delays([delay])
 
 # Run with matplotlib visualization
 SIMULATION_DURATION_SECONDS = 160000  # Total simulation time

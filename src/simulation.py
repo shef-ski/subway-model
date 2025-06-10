@@ -3,7 +3,7 @@ from typing import List
 
 from src.subway.abstract_subway_line import AbstractSubwayLine
 from src.subway.event.event import Event
-
+from src.subway.delay.delay import Delay
 
 class Simulation:
     lines: list[AbstractSubwayLine]
@@ -18,6 +18,7 @@ class Simulation:
         self.capacity = capacity
         self.lines = []
         self.events = []
+        self.delays = []
 
     def add_line(self, line: AbstractSubwayLine):
         self.lines.append(line)
@@ -25,11 +26,14 @@ class Simulation:
     def add_events(self, events: List[Event]):
         self.events.extend(events)
 
+    def add_delays(self, delays: List[Delay]):
+        self.delays.extend(delays)
+
     def step(self):
         """Advances the simulation by one time step (1 second)."""
 
         for line in self.lines:
-            line.update(self.current_time, self.events)
+            line.update(self.current_time, self.events, self.delays)
 
         # Increment time for the next step
         self.current_time += self.timedelta

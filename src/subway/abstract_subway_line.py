@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import List, Dict
 
 from src.subway.event.event import Event
+from src.subway.delay.delay import Delay
 from src.subway.passenger import SubwayPassenger
 from src.subway.subway_station import SubwayStation
 from src.subway.train import Train
@@ -41,7 +42,7 @@ class AbstractSubwayLine(ABC):
             else:
                 self.train_queue.append(new_train)
 
-    def update(self, current_time: datetime, events: List[Event]):
+    def update(self, current_time: datetime, events: List[Event], delays: List[Delay]):
         """Try to deploy the first queued train, then update all trains and all stations."""
 
         self.check_for_train_spawns(current_time)
@@ -57,6 +58,18 @@ class AbstractSubwayLine(ABC):
         for station in self.stations:
             arriving_passengers = self.sample_arriving_passengers(station, current_time, events)
             station.random_psg_arrival(arriving_passengers)
+
+            if delays and delays[0].start_time <= current_time:
+                for delay in delays:
+                    if delay.nearest_station_id == station.id:
+                        if delay.start_time <= current_time < delay.end_time:
+                            station.set_delay_up()
+                        else:
+                            station.clear_delay_up()
+
+
+
+
 
     def _first_station_is_available(self):
         for train in self.trains:
