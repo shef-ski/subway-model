@@ -35,9 +35,10 @@ def animate_simulation_2d(sim: Simulation,
     # --- Plot setup ---
     fig, ax = plt.subplots(1, 1, figsize=(14, 14))
 
-    if trim_to_square:
-        print("Warning: this setting is bugged and currently only used to" \
-        "view the whole NYC Map")
+    if not trim_to_square:
+        print("Warning: not trimming to square is bugged and currently only used to" \
+        "view the whole NYC Map. Better to use trim_to_square = True.")
+    else:
         map.trim_map_to_stations_square()
         min_plot_lon, max_plot_lon, min_plot_lat, max_plot_lat = map.square_bounds
         ax.set_xlim(min_plot_lon, max_plot_lon)
@@ -78,9 +79,9 @@ def animate_simulation_2d(sim: Simulation,
     ax.text(0.01, 0.96, f'Line: {line.name}', transform=ax.transAxes)
     
     train_markers = [ax.plot(0, 0, 's', markersize=10, color='lightgreen')[0]
-                     for t in line.get_trains()]
+                             for t in line.get_trains()]
     train_psg = [ax.text(0, 0, f'{len(t.passengers)}', va='center', fontsize=9)
-                 for t in line.get_trains()]
+                         for t in line.get_trains()]
 
     station_n_psg_up = [ax.text(s.lon, s.lat+0.0015, get_waiting_text_up(s),
                                 va='center', fontsize=9, color="red")
@@ -128,7 +129,7 @@ def animate_simulation_2d(sim: Simulation,
                 time_since_departure = sim.current_time - train.previous_departure_time
                 travel_progress = min(1.0, time_since_departure.total_seconds() /
                                       train.get_travel_time())
-                
+
                 start_x = train.prev_station.lon
                 start_y = train.prev_station.lat
 
@@ -140,11 +141,15 @@ def animate_simulation_2d(sim: Simulation,
 
             if x_pos is not None:
                 train_markers[i].set_data([x_pos], [y_pos])
-                if train.direction == 1:
+                if train.is_broken:
+                    train_markers[i].set_color('brown')
+                elif train.pct_utilized >= 0.99:
+                    train_markers[i].set_color('yellow')
+                elif train.direction == 1:
                     train_markers[i].set_color('red')
                 else:
                     train_markers[i].set_color('blue')
-                train_psg[i].set_position((x_pos, y_pos))
+                train_psg[i].set_position((x_pos+0.0012, y_pos))
                 train_psg[i].set_text(f"{len(train.passengers)}")
                 updates.append(train_markers[i])
                 #updates.append(train_texts[i])
