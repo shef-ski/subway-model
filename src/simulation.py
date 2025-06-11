@@ -16,10 +16,10 @@ class Simulation:
         self.lines = []
         self.events = []
         self.breaking_times = []
+        self.delays = []
 
         # Stores the waiting times of all passengers in seconds
         self.all_passenger_travel_times = []
-        self.delays = []
 
     def add_line(self, line: AbstractSubwayLine):
         self.lines.append(line)
@@ -38,7 +38,7 @@ class Simulation:
 
         for line in self.lines:
             travel_times = line.update(
-                self.current_time, self.events, self.delays, self.breaking_times
+                self.current_time, self.events, self.breaking_times, self.delays
             )
 
             if travel_times:
