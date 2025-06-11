@@ -17,12 +17,6 @@ random.seed(seed)
 start_time = datetime(2025, 2, 4, 6, 0)
 sim = Simulation(start_time=start_time, time_delta=timedelta(seconds=1))
 
-delay_start_time = start_time + timedelta(minutes=10)
-delay_end_time = delay_start_time + timedelta(minutes=10)
-
-# Create delay
-delay = Delay("coffee", 5, delay_start_time, delay_end_time)
-
 # Create a subway line and a corresponding map
 nyc_data_service = NycDataService()
 line = nyc_data_service.load_nyc_line("Lexington Av-6")
@@ -36,13 +30,18 @@ train_breaking_times = []
 train_breaking_times.append(start_time + timedelta(minutes=45))
 train_breaking_times.append(start_time + timedelta(minutes=62))
 train_breaking_times.append(start_time + timedelta(minutes=70))
-sim.add_breaking_times(train_breaking_times)
+# sim.add_breaking_times(train_breaking_times)
 
 # OPTIONAL: Create basic event which temporarily increases ridership
 event_start_time = start_time + timedelta(minutes=30)
 event_end_time = event_start_time + timedelta(hours=1)
 event = Event("show", 5, 3000, event_start_time, event_end_time)
 # sim.add_events([event])
+
+# OPTIONAL: Create delay
+delay_start_time = start_time + timedelta(minutes=10)
+delay_end_time = delay_start_time + timedelta(minutes=10)
+delay = Delay("coffee", 5, delay_start_time, delay_end_time)
 sim.add_delays([delay])
 
 # Run with matplotlib visualization
