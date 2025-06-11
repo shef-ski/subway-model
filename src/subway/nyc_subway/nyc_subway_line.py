@@ -36,13 +36,15 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
                  stations: List[SubwayStation],
                  arriving_passengers_lookup: pd.DataFrame,
                  train_spawns: Dict[Tuple[str, int, int, int], SubwayStation],
-                 train_travel_times: Dict[SubwayStation, Dict[int, int]]):
+                 train_travel_times: Dict[SubwayStation, Dict[int, int]],
+                 capacity: int):
         self.arriving_passengers_lookup = arriving_passengers_lookup
         self.sampled_lookup = {}
         self.sampled_event_lookup = {}
         self.train_spawns = train_spawns
         self.train_travel_times = train_travel_times
-        super().__init__(name, stations)
+        
+        super().__init__(name, stations, capacity)
 
     def distribute_event_passengers_uniform_dict(self, stations, total_passengers):
         n = len(stations)
@@ -69,7 +71,12 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
 
                     direction = 1 if destination_index > current_index else -1
 
-                    passenger = SubwayPassenger(entry_id=station.id, leave_id=other_station.id, direction=direction, event_name=key)
+                    passenger = SubwayPassenger(entry_id=station.id,
+                                                leave_id=other_station.id,
+                                                direction=direction,
+                                                spawn_time=current_time,
+                                                event_name=key
+                                                )
                     passengers.append(passenger)
 
             for i in range(1, round(estimated_ridership) + 1):
@@ -78,7 +85,10 @@ class NycSubwayLine(AbstractSubwayLine, ABC):
 
                 direction = 1 if destination_index > current_index else -1
 
-                passenger = SubwayPassenger(entry_id=station.id, leave_id=other_station.id, direction=direction)
+                passenger = SubwayPassenger(entry_id=station.id,
+                                            leave_id=other_station.id,
+                                            direction=direction,
+                                            spawn_time=current_time)
                 passengers.append(passenger)
 
         return passengers

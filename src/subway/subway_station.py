@@ -25,6 +25,9 @@ class SubwayStation:
 
     def __repr__(self):
         return f"Station {self.id}"
+    
+    def increase_waiting_passengers(self, disembarked_passengers: List[SubwayPassenger]):
+        self.waiting_passengers += disembarked_passengers
 
     def random_psg_arrival(self, arriving_passengers: List[SubwayPassenger]):
         self.waiting_passengers = [*self.waiting_passengers, *arriving_passengers]

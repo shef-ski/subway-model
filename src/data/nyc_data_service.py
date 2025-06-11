@@ -6,7 +6,6 @@ from typing import List, Dict, Tuple
 
 import pandas
 
-from src.data.nyc_map import get_station_coords
 from src.subway.nyc_subway.nyc_subway_line import NycSubwayLine
 from src.subway.subway_station import SubwayStation
 
@@ -45,7 +44,7 @@ class NycDataService:
         print(f"Folder '{name}' exists and contains all required files.")
         return True
 
-    def load_nyc_line(self, name: str) -> NycSubwayLine:
+    def load_nyc_line(self, name: str, capacity: int = 500) -> NycSubwayLine:
 
         if not self._line_data_exists(name):
             raise ValueError(f"Cannot find data for lane {name}")
@@ -64,7 +63,7 @@ class NycDataService:
                 is_end = sortorder == min_sortorder or sortorder == max_sortorder
 
                 stop_name = str(row['stop_name'])
-                lon, lat = get_station_coords(stop_name, NycDataService.STOPS_PATH)
+                lon, lat = float(row['stop_lon']), float(row['stop_lat'])
 
                 station = SubwayStation(station_id=sortorder, is_end=is_end,
                                         name=stop_name, lon=lon, lat=lat)
@@ -75,7 +74,7 @@ class NycDataService:
         train_spawns = self.read_train_spawns(name, stations)
         train_travel_times = self.read_train_travel_times(name, stations)
 
-        return NycSubwayLine(name, stations, lookup_table, train_spawns, train_travel_times)
+        return NycSubwayLine(name, stations, lookup_table, train_spawns, train_travel_times, capacity)
 
     def _get_metadata_file_path(self, name) -> str:
         folder_path = os.path.join(self.data_path, name)
