@@ -71,7 +71,7 @@ class Train:
         if self.state == TrainState.AT_STATION:
             if self.ready_to_depart_at is None:  # Train just arrived / was deployed
 
-                self.ready_to_depart_at = current_time + timedelta(seconds=max(DWELL_TIME_AT_STATION, round(len(self.current_station.waiting_passengers)/100)))
+                self.ready_to_depart_at = current_time + timedelta(seconds=max(DWELL_TIME_AT_STATION, round(len(self.current_station.waiting_passengers)/10)))
 
                 self.remaining_destinations = self.remaining_destinations[1:]
                 self.next_station = self.remaining_destinations[0]
@@ -104,7 +104,7 @@ class Train:
 
                 self.prev_station = self.current_station
                 self.current_station = None  # No longer "at" the previous station
-                self.previous_departure_time = self.ready_to_depart_at  # for viz
+                self.previous_departure_time = current_time  # for viz
                 self.ready_to_depart_at = None  # Clear departure readiness
 
         # Train is currently traveling to the next station
@@ -251,9 +251,9 @@ class Train:
 
     def check_station_free(self):
         if self.direction == 1:
-            return self.next_station.get_occupation_up() == False
+            return self.next_station.get_occupation_up() == False and self.current_station.get_delay_up() == False
         else:
-            return self.next_station.get_occupation_down() == False
+            return self.next_station.get_occupation_down() == False and self.current_station.get_delay_down() == False
 
     def has_finished_tour(self):
         return self.finished_tour

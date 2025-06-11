@@ -4,6 +4,7 @@ from typing import List, Dict
 import random
 
 from src.subway.event.event import Event
+from src.subway.delay.delay import Delay
 from src.subway.passenger import SubwayPassenger
 from src.subway.subway_station import SubwayStation
 from src.subway.train import Train
@@ -29,14 +30,17 @@ class AbstractSubwayLine(ABC):
             i += 1
         return i
 
-    def add_train(self, station: SubwayStation, direction: int, is_rotating_train: bool):
-
+    def add_train(
+        self, station: SubwayStation, direction: int, is_rotating_train: bool
+    ):
         # Create new train and raise counter to ensure unique naming
-        new_train = Train(self.get_lowest_unused_id(self.trains),
-                          self.stations,
-                          direction,
-                          is_rotating_train,
-                          capacity=self.capacity)
+        new_train = Train(
+            self.get_lowest_unused_id(self.trains),
+            self.stations,
+            direction,
+            is_rotating_train,
+            capacity=self.capacity,
+        )
 
         self.trains.append(new_train)
 
@@ -49,20 +53,22 @@ class AbstractSubwayLine(ABC):
             else:
                 self.train_queue.append(new_train)
 
-    def update(self,
-               current_time: datetime,
-               events: List[Event],
-               breaking_times: List[datetime]) -> List[float]:
-        
+    def update(
+        self,
+        current_time: datetime,
+        events: List[Event],
+        breaking_times: List[datetime],
+        delays: List[Delay],
+    ) -> List[float]:
         """Try to deploy the first queued train, then update all trains and all stations.
-        
+
         Returns the list of all travel times of those passengers who disembarked
         """
         travel_times = []
 
         self.check_for_train_spawns(current_time)
         self.remove_trains_that_reached_end()
-        
+
         if breaking_times:
             self._check_if_train_breaks(current_time, breaking_times)
 
@@ -74,14 +80,23 @@ class AbstractSubwayLine(ABC):
             travel_times += train.update(current_time, self.get_train_travel_times())
 
         for station in self.stations:
-            arriving_passengers = self.sample_arriving_passengers(station, current_time, events)
+            arriving_passengers = self.sample_arriving_passengers(
+                station, current_time, events
+            )
             station.random_psg_arrival(arriving_passengers)
 
+            if delays and delays[0].start_time <= current_time:
+                for delay in delays:
+                    if delay.nearest_station_id == station.id:
+                        if delay.start_time <= current_time < delay.end_time:
+                            station.set_delay_up()
+                        else:
+                            station.clear_delay_up()
         return travel_times
 
-    def _check_if_train_breaks(self,
-                               current_time: datetime,
-                               breaking_times: List[datetime]):
+    def _check_if_train_breaks(
+        self, current_time: datetime, breaking_times: List[datetime]
+    ):
         if current_time >= breaking_times[0]:
             # Select a (pseudo-)random train which breaks
             broken_train = random.choice(self.trains)
@@ -102,7 +117,9 @@ class AbstractSubwayLine(ABC):
         return self.stations
 
     @abstractmethod
-    def sample_arriving_passengers(self, station: SubwayStation, current_time: datetime, events: List[Event]) -> List[SubwayPassenger]:
+    def sample_arriving_passengers(
+        self, station: SubwayStation, current_time: datetime, events: List[Event]
+    ) -> List[SubwayPassenger]:
         pass
 
     @abstractmethod

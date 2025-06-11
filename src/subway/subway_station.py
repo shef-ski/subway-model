@@ -17,7 +17,8 @@ class SubwayStation:
         self.waiting_passengers: List[SubwayPassenger] = []
         self.incoming_train_up = False
         self.incoming_train_down = False
-
+        self.delay_up = False
+        self.delay_down = False
         self.name = name
         self.lon = lon
         self.lat = lat
@@ -67,5 +68,19 @@ class SubwayStation:
         self.incoming_train_down = True
     def train_leave_down(self):
         self.incoming_train_down = False
+    def set_delay_up(self):
+        self.delay_up = True
+    def set_delay_down(self):
+        self.delay_down = True
+    def clear_delay_up(self):
+        self.delay_up = False
+    def clear_delay_down(self):
+        self.delay_down = False
+
+    def get_delay_up(self):
+        return self.delay_up
+    def get_delay_down(self):
+        return self.delay_down
+
 
 
