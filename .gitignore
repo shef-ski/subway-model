@@ -179,3 +179,5 @@ data/*.csv
 
 # for now, dont upload the mp4 recording every time
 *.mp4
+
+analysis/outputs/

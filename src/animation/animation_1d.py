@@ -42,7 +42,7 @@ def animate_simulation_1d(sim: Simulation,
         Uses matplotlib variables from the outer scope.
         """
 
-        sim.step(500)
+        sim.step()
         updates = []  # Artists to be redrawn
 
         # Add empty train markers if new train was added

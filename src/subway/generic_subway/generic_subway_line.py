@@ -15,7 +15,7 @@ class GenericSubwayLine(AbstractSubwayLine, ABC):
 
     def __init__(self,
                  name: str,
-                 n_stations: int):
+                 n_stations: int, cap):
         stations: List[SubwayStation] = []
         for station_id in range(1, n_stations+1):
             is_end = (station_id == 1 or station_id == n_stations)
@@ -29,7 +29,7 @@ class GenericSubwayLine(AbstractSubwayLine, ABC):
             } for station in stations
         }
 
-        super().__init__(name, stations)
+        super().__init__(name, stations, cap)
 
     def sample_arriving_passengers(self, station: SubwayStation, current_time: datetime, events: List[Event]) -> List[SubwayPassenger]:
         passengers = []

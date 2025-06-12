@@ -8,64 +8,75 @@ from src.data.nyc_map import NycMap
 from src.simulation import Simulation
 from src.subway.event.event import Event
 from src.subway.delay.delay import Delay
+from src.subway.generic_subway.generic_subway_line import GenericSubwayLine
 
+# --- Constants ---
+SEED = 12345
+random.seed(SEED)
 
-seed = 12345
-random.seed(seed)
+ADD_BREAKING_TIMES = True
+ADD_EVENTS = True
+ADD_DELAY = True
 
-# Create a simulation
-start_time = datetime(2025, 2, 4, 6, 0)
-sim = Simulation(start_time=start_time, time_delta=timedelta(seconds=1))
+SIM_START_TIME = datetime(2025, 1, 6, 6, 0)
+
+SIMULATION_DURATION_SECONDS = 14400  # = 4h
+ANIMATION_INTERVAL_MS = 2  # Visualization speed
+ANIMATE_2D = True
+SAVE_VIDEO = True
+
+# --- Simulation ---
+# Create a simulation object
+sim = Simulation(start_time=SIM_START_TIME, time_delta=timedelta(seconds=1))
 
 # Create a subway line and a corresponding map
 nyc_data_service = NycDataService()
 line = nyc_data_service.load_nyc_line("Lexington Av-6")
 map = NycMap(NycDataService.SHAPE_PATH, line)
 
+#line = GenericSubwayLine("U4", 3, 500)
+
 # Add the line to the simulation
 sim.add_line(line)
 
 # OPTIONAL: Add times [t1, t2, ...] at which a (pseudo-)random train breaks
-train_breaking_times = []
-train_breaking_times.append(start_time + timedelta(minutes=45))
-train_breaking_times.append(start_time + timedelta(minutes=62))
-train_breaking_times.append(start_time + timedelta(minutes=70))
-# sim.add_breaking_times(train_breaking_times)
+if ADD_BREAKING_TIMES:
+    train_breaking_times = []
+    train_breaking_times.append(SIM_START_TIME + timedelta(minutes=60))
+    train_breaking_times.append(SIM_START_TIME + timedelta(minutes=70))
+    train_breaking_times.append(SIM_START_TIME + timedelta(minutes=80))
+    sim.add_breaking_times(train_breaking_times)
 
 # OPTIONAL: Create basic event which temporarily increases ridership
-event_start_time = start_time + timedelta(minutes=30)
-event_end_time = event_start_time + timedelta(hours=1)
-event = Event("show", 5, 3000, event_start_time, event_end_time)
-sim.add_events([event])
+if ADD_EVENTS:
+    event_start_time = SIM_START_TIME + timedelta(minutes=120)
+    event_end_time = event_start_time + timedelta(hours=1)
+    event = Event("show", 5, 3000, event_start_time, event_end_time)
+    sim.add_events([event])
 
 # OPTIONAL: Create delay
-delay_start_time = start_time + timedelta(minutes=10)
-delay_end_time = delay_start_time + timedelta(minutes=10)
-delay = Delay("coffee", 5, delay_start_time, delay_end_time)
-sim.add_delays([delay])
+if ADD_DELAY:
+    delay_start_time = SIM_START_TIME + timedelta(minutes=210)
+    delay_end_time = delay_start_time + timedelta(minutes=10)
+    delay = Delay("coffee", 5, delay_start_time, delay_end_time)
+    sim.add_delays([delay])
 
-# Run with matplotlib visualization
-SIMULATION_DURATION_SECONDS = 160000  # Total simulation time
-ANIMATION_INTERVAL_MS = 2  # Visualization speed
-ANIMATE_2D = True
-
+# --- Animation ---
 if ANIMATE_2D:
-    # requires a NycMap object
     animate_simulation_2d(
         sim,
         map,
         SIMULATION_DURATION_SECONDS,
         ANIMATION_INTERVAL_MS,
-        save_video=False,
+        save_video=SAVE_VIDEO,
         output_dir=".",
         trim_to_square=True,
     )
-
 else:
     animate_simulation_1d(
         sim,
         SIMULATION_DURATION_SECONDS,
         ANIMATION_INTERVAL_MS,
-        save_video=False,
+        save_video=SAVE_VIDEO,
         output_dir=".",
     )

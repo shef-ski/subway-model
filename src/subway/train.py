@@ -143,7 +143,12 @@ class Train:
             else:
                 self.ready_to_depart_at = current_time
             self.remaining_destinations = self.remaining_destinations[1:]
-            self.next_station = self.remaining_destinations[0]
+            try:
+                self.next_station = self.remaining_destinations[0]
+            except IndexError:
+                print("Warning: forcing the finish of a train due to index error")
+                self.finished_tour = True
+            
             if current_time >= self.ready_to_depart_at and self.check_station_free() == True:  # Depart towards the next station
                 if self.direction == 1:
                     if self.next_station.is_end:
