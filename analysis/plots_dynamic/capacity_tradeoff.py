@@ -52,6 +52,64 @@ def _plot_single_tradeoff_curve(
         )
 
 
+def _plot_single_tradeoff_curve2(
+    ax, all_util_rates: dict, all_travel_times: dict, label: str, color: str
+):
+    import numpy as np
+
+    inverse_util_rates = {
+        cap: [1 - r for r in rates] for cap, rates in all_util_rates.items()
+    }
+    sorted_capacities = sorted(inverse_util_rates.keys())
+
+    avg_emptiness_rates = []
+    std_emptiness_rates = []
+    avg_travel_times = []
+    std_travel_times = []
+
+    for cap in sorted_capacities:
+        empties = inverse_util_rates[cap]
+        times = all_travel_times[cap]
+        avg_emptiness_rates.append(np.mean(empties))
+        std_emptiness_rates.append(np.std(empties))
+        avg_travel_times.append(np.mean(times))
+        std_travel_times.append(np.std(times))
+
+    # Main line:
+    ax.plot(
+        avg_travel_times,
+        avg_emptiness_rates,
+        marker="o",
+        linestyle="-",
+        color=color,
+        label=label,
+    )
+
+    # Subtle shaded bands for deviation (95% confidence or 1 std)
+    ax.fill_between(
+        avg_travel_times,
+        np.array(avg_emptiness_rates) - np.array(std_emptiness_rates),
+        np.array(avg_emptiness_rates) + np.array(std_emptiness_rates),
+        color=color,
+        alpha=0.15,
+        linewidth=0,
+        zorder=0,
+    )
+
+    # Annotations for clarity (optional)
+    for i, capacity in enumerate(sorted_capacities):
+        ax.annotate(
+            f"C={capacity}",
+            (avg_travel_times[i], avg_emptiness_rates[i]),
+            textcoords="offset points",
+            xytext=(0, -12),
+            ha="center",
+            fontsize=8,
+            color=color,
+            alpha=0.9,
+        )
+
+
 def plot_tradeoff_curves(runners: List[SimulationRunner]):
     """
     Creates a single plot with multiple tradeoff curves, one for each SimulationRunner.

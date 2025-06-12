@@ -14,15 +14,15 @@ from tools.simulation_runner import SimulationRunner
 # python -m analysis.run_simulations
 
 # --- Set constant parameters for the experiment ---
-SEED = 12345
+SEED = 1234
 random.seed(SEED)
 
-N_RUNS = 2
+N_RUNS = 3
 DURATION = 5400  # 5400s = 90min
 
 CAPACITIES = [200, 500, 800, 1200]
 
-SIM_START_TIME = datetime(2025, 1, 6, 7, 0)
+SIM_START_TIME = datetime(2025, 1, 6, 7, 30)
 SIM_TIME_DELTA = timedelta(seconds=1)
 
 LINE_NAME = "Lexington Av-6"
@@ -31,7 +31,7 @@ SAVE_OUTPUTS = True
 SAVE_PATH = "analysis/outputs/"
 
 ADD_BREAKING_TIMES = False
-ADD_EVENTS = False
+ADD_EVENTS = True
 ADD_DELAY = False
 
 
@@ -50,9 +50,9 @@ if ADD_BREAKING_TIMES:
 # OPTIONAL: Create basic event which temporarily increases ridership
 events = []
 if ADD_EVENTS:
-    event_start_time = SIM_START_TIME + timedelta(minutes=30)
+    event_start_time = SIM_START_TIME + timedelta(minutes=35)
     event_end_time = event_start_time + timedelta(hours=1)
-    event = Event("show", 5, 3000, event_start_time, event_end_time)
+    event = Event("show", 5, 20000, event_start_time, event_end_time)
     events.append(event)
 
 # OPTIONAL: Create delay
@@ -69,7 +69,7 @@ simulation_runner.run_simulations(breaking_times, events, delays)
 if SAVE_OUTPUTS:
     simulation_runner.save_outputs(SAVE_PATH)
 
-    
+
 # --- Make visualizations ---
 # this should also work with the saved outputs from above
 

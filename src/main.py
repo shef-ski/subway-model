@@ -14,16 +14,16 @@ from src.subway.generic_subway.generic_subway_line import GenericSubwayLine
 SEED = 12345
 random.seed(SEED)
 
-ADD_BREAKING_TIMES = True
-ADD_EVENTS = True
-ADD_DELAY = True
+ADD_BREAKING_TIMES = False
+ADD_EVENTS = False
+ADD_DELAY = False
 
-SIM_START_TIME = datetime(2025, 1, 6, 6, 0)
+SIM_START_TIME = datetime(2025, 1, 6, 8, 0)
 
-SIMULATION_DURATION_SECONDS = 14400  # = 4h
+SIMULATION_DURATION_SECONDS = 180  # = 4h
 ANIMATION_INTERVAL_MS = 2  # Visualization speed
 ANIMATE_2D = True
-SAVE_VIDEO = True
+SAVE_VIDEO = False
 
 # --- Simulation ---
 # Create a simulation object
@@ -34,7 +34,7 @@ nyc_data_service = NycDataService()
 line = nyc_data_service.load_nyc_line("Lexington Av-6")
 map = NycMap(NycDataService.SHAPE_PATH, line)
 
-#line = GenericSubwayLine("U4", 3, 500)
+# line = GenericSubwayLine("U4", 3, 500)
 
 # Add the line to the simulation
 sim.add_line(line)
