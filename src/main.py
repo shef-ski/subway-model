@@ -36,7 +36,7 @@ train_breaking_times.append(start_time + timedelta(minutes=70))
 event_start_time = start_time + timedelta(minutes=30)
 event_end_time = event_start_time + timedelta(hours=1)
 event = Event("show", 5, 3000, event_start_time, event_end_time)
-# sim.add_events([event])
+sim.add_events([event])
 
 # OPTIONAL: Create delay
 delay_start_time = start_time + timedelta(minutes=10)

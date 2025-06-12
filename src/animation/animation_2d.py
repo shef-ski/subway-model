@@ -75,6 +75,18 @@ def animate_simulation_2d(sim: Simulation,
                 f'Event: {event.name} at {event.start_time.strftime("%H:%M")} - {event.end_time.strftime("%H:%M")} with {event.expected_ridership} estimated people and nearest station {event_station}',
                 transform=ax.transAxes)
         event_offset += -0.1
+
+    for delay in sim.delays:
+
+        delay_station = ""
+        for station in line.stations:
+            if station.id == delay.nearest_station_id:
+                delay_station = station.name
+
+        ax.text(0.01, 0.96 + event_offset,
+                f'Delay: {delay.name} at {delay.start_time.strftime("%H:%M")} - {delay.end_time.strftime("%H:%M")}  and nearest station {delay_station}',
+                transform=ax.transAxes)
+        event_offset += -0.1
     
     ax.text(0.01, 0.96, f'Line: {line.name}', transform=ax.transAxes)
     
