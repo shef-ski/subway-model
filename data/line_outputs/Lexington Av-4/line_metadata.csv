@@ -1,0 +1,10 @@
+stop_name,Line,sortorder,gtfs_stop_id,stop_lat,stop_lon
+125 St,Lexington Av,0,621,40.804138,-73.937594
+86 St,Lexington Av,1,626,40.779492,-73.955589
+59 St,Lexington Av,2,629,40.762526,-73.967967
+Grand Central-42 St,Lexington Av,3,631,40.751776,-73.976848
+14 St-Union Sq,Lexington Av,4,635,40.734673,-73.989951
+Brooklyn Bridge-City Hall,Lexington Av,5,640,40.713065,-74.004131
+Fulton St,Lexington Av,6,418,40.710368,-74.009509
+Wall St,Lexington Av,7,419,40.707557,-74.011862
+Bowling Green,Lexington Av,8,420,40.704817,-74.014065

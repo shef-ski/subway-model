@@ -1,0 +1,21 @@
+stop_name,Line,sortorder,gtfs_stop_id,stop_lat,stop_lon
+125 St,Lexington Av,0,621,40.804138,-73.937594
+116 St,Lexington Av,1,622,40.798629,-73.941617
+110 St,Lexington Av,2,623,40.79502,-73.94425
+103 St,Lexington Av,3,624,40.7906,-73.947478
+96 St,Lexington Av,4,625,40.785672,-73.95107
+86 St,Lexington Av,5,626,40.779492,-73.955589
+77 St,Lexington Av,6,627,40.77362,-73.959874
+68 St-Hunter College,Lexington Av,7,628,40.768141,-73.96387
+59 St,Lexington Av,8,629,40.762526,-73.967967
+51 St,Lexington Av,9,630,40.757107,-73.97192
+Grand Central-42 St,Lexington Av,10,631,40.751776,-73.976848
+33 St,Lexington Av,11,632,40.746081,-73.982076
+28 St,Lexington Av,12,633,40.74307,-73.984264
+23 St,Lexington Av,13,634,40.739864,-73.986599
+14 St-Union Sq,Lexington Av,14,635,40.734673,-73.989951
+Astor Pl,Lexington Av,15,636,40.730054,-73.99107
+Bleecker St,Lexington Av,16,637,40.725915,-73.994659
+Spring St,Lexington Av,17,638,40.722301,-73.997141
+Canal St,Lexington Av,18,639,40.718803,-74.000193
+Brooklyn Bridge-City Hall,Lexington Av,19,640,40.713065,-74.004131
