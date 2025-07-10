@@ -1,17 +1,20 @@
 import pandas as pd
 import seaborn as sns
 import matplotlib
-matplotlib.use('TkAgg')  # Use TkAgg backend for interactive plots
+
+matplotlib.use("TkAgg")  # Use TkAgg backend for interactive plots
 from matplotlib import pyplot as plt
 
 
-def plot_ridership_by_hour(df: pd.DataFrame, 
-                            x: str = "hour_of_day", 
-                            y: str = "estimated_ridership", 
-                            col: str = "day_of_week", 
-                            hue: str = "Month") -> None:
+def plot_ridership_by_hour(
+    df: pd.DataFrame,
+    x: str = "hour_of_day",
+    y: str = "estimated_ridership",
+    col: str = "day_of_week",
+    hue: str = "Month",
+) -> None:
     """
-    Generate a relational plot of estimated ridership by hour of the day, 
+    Generate a relational plot of estimated ridership by hour of the day,
     separated by day of the week and colored by month.
 
     NOTE: Seaborn documentation: https://seaborn.pydata.org/tutorial/relational.html
@@ -28,13 +31,8 @@ def plot_ridership_by_hour(df: pd.DataFrame,
     Returns:
     - None: This function displays the plot and does not return any value.
     """
-    sns.relplot(data=df, 
-                 x=x, 
-                 y=y, 
-                 col=col, 
-                 hue=hue, 
-                 kind="line")
-    
+    sns.relplot(data=df, x=x, y=y, col=col, hue=hue, kind="line")
+
     plt.show()
 
 
@@ -44,9 +42,8 @@ df = pd.read_csv("data/line_outputs/Crosstown/direction_estimates.csv")
 # Usage:
 # plot_ridership_by_hour(df)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     plot_ridership_by_hour(df)
     # # Save the plot to a file
     # plt.savefig("ridership_by_hour.png")
     # print("Plot saved as ridership_by_hour.png")
-    

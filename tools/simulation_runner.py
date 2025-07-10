@@ -127,7 +127,9 @@ class SimulationRunner:
 
         # Create a unique directory name for this run to avoid overwriting results
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_dir = Path(base_path) / f"sim_{indicator_1}{indicator_2}{indicator_3}_{timestamp}"
+        output_dir = (
+            Path(base_path) / f"sim_{indicator_1}{indicator_2}{indicator_3}_{timestamp}"
+        )
 
         # Create the directory, including any parent directories if they don't exist
         output_dir.mkdir(parents=True, exist_ok=True)
@@ -142,9 +144,9 @@ class SimulationRunner:
             "start_time": self.start_time.isoformat(),
             "time_delta_seconds": self.time_delta.total_seconds(),
             "line_name": self.line_name,
-#            "breaking_times": self.breaking_times,
- #           "events": self.events,
-#            "delays": self.delays
+            #            "breaking_times": self.breaking_times,
+            #           "events": self.events,
+            #            "delays": self.delays
         }
         with open(output_dir / "metadata.json", "w") as f:
             json.dump(metadata, f, indent=4)

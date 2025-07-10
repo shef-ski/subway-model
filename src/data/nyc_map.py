@@ -3,15 +3,15 @@ from shapely.geometry import box
 
 from src.subway.nyc_subway.nyc_subway_line import NycSubwayLine
 
- 
+
 class NycMap:
     """
     A class which holds a NYC Map and the coordinates of the relevant stations.
-    
+
     The geo_df is geopandas dataframe which is an extension to a regular pandas df but
-    with geographical information.    
+    with geographical information.
     """
- 
+
     square_bounds: tuple
     stations_lon: list
     stations_lat: list
@@ -36,11 +36,10 @@ class NycMap:
     def _handle_crs(self):
         """Handle the coordinate reference system."""
 
-        self.geo_df = self.geo_df.set_crs(epsg=2263, allow_override=True) 
+        self.geo_df = self.geo_df.set_crs(epsg=2263, allow_override=True)
         self.geo_df = self.geo_df.to_crs(epsg=4326)
 
-    def trim_map_to_stations_square(self,
-                                    buffer=0.005):
+    def trim_map_to_stations_square(self, buffer=0.005):
         """
         Trims a GeoDataFrame to a square area encompassing station coordinates.
 
@@ -90,8 +89,10 @@ class NycMap:
 
         # 7. Create a bounding box polygon using Shapely
         #    The order is (minx, miny, maxx, maxy)
-        clipping_box_geom = box(square_min_lon, square_min_lat, square_max_lon, square_max_lat)
-        
+        clipping_box_geom = box(
+            square_min_lon, square_min_lat, square_max_lon, square_max_lat
+        )
+
         try:
             self.geo_df = gpd.clip(self.geo_df, clipping_box_geom)
         except Exception as e:
@@ -99,8 +100,6 @@ class NycMap:
             print("Ensure the GeoDataFrame and clipping box are valid and overlap.")
 
         # Store the bounds for potential use in set_xlim/set_ylim
-        square_bounds = (square_min_lon, square_max_lon,
-                         square_min_lat, square_max_lat)
-        
+        square_bounds = (square_min_lon, square_max_lon, square_min_lat, square_max_lat)
+
         self.square_bounds = square_bounds
-    

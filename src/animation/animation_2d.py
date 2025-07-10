@@ -15,6 +15,7 @@ def get_waiting_text_up(s: SubwayStation):
 
     return f"{len(s.get_waiting_psg_up_regular())}"
 
+
 def get_waiting_text_down(s: SubwayStation):
     if len(s.get_waiting_psg_down_event()) > 0:
         return f"{len(s.get_waiting_psg_down_regular())} + {len(s.get_waiting_psg_down_event())}"
@@ -22,95 +23,125 @@ def get_waiting_text_down(s: SubwayStation):
     return f"{len(s.get_waiting_psg_down_regular())}"
 
 
-def animate_simulation_2d(sim: Simulation,
-                          map: NycMap,
-                          duration_seconds: int,
-                          animation_interval_ms: int,
-                          save_video: bool = False,
-                          trim_to_square: bool = True,
-                          output_dir: str = "."):
-
+def animate_simulation_2d(
+    sim: Simulation,
+    map: NycMap,
+    duration_seconds: int,
+    animation_interval_ms: int,
+    save_video: bool = False,
+    trim_to_square: bool = True,
+    output_dir: str = ".",
+):
     line = sim.lines[0]  # Only visualize first line for now
 
     # --- Plot setup ---
     fig, ax = plt.subplots(1, 1, figsize=(14, 14))
 
     if not trim_to_square:
-        print("Warning: not trimming to square is bugged and currently only used to" \
-        "view the whole NYC Map. Better to use trim_to_square = True.")
+        print(
+            "Warning: not trimming to square is bugged and currently only used to"
+            "view the whole NYC Map. Better to use trim_to_square = True."
+        )
     else:
         map.trim_map_to_stations_square()
         min_plot_lon, max_plot_lon, min_plot_lat, max_plot_lat = map.square_bounds
         ax.set_xlim(min_plot_lon, max_plot_lon)
         ax.set_ylim(min_plot_lat, max_plot_lat)
 
-    map.geo_df.plot(ax=ax, color='lightgray', edgecolor='white')
+    map.geo_df.plot(ax=ax, color="lightgray", edgecolor="white")
     # Set the background color of the axis (plot area)
-    ax.set_facecolor('skyblue')
+    ax.set_facecolor("skyblue")
     ax.set_xlabel("Longitude")
     ax.set_ylabel("Latitude")
 
-    ax.set_aspect(aspect=0.9, adjustable='box') # aspect = 1 for square
+    ax.set_aspect(aspect=0.9, adjustable="box")  # aspect = 1 for square
 
-    ax.plot(map.stations_lon, 
-            map.stations_lat, 
-            '-o',                 
-            color='black',          
-            markersize=10,     
-            linewidth=1,
-            label='Subway Line') 
+    ax.plot(
+        map.stations_lon,
+        map.stations_lat,
+        "-o",
+        color="black",
+        markersize=10,
+        linewidth=1,
+        label="Subway Line",
+    )
 
-    time_text = ax.text(0.01, 0.90, f'Time: {sim.current_time} s',
-                        transform=ax.transAxes)
+    time_text = ax.text(
+        0.01, 0.90, f"Time: {sim.current_time} s", transform=ax.transAxes
+    )
 
     event_offset = -0.1
     for event in sim.events:
-
         event_station = ""
         for station in line.stations:
             if station.id == event.nearest_station_id:
                 event_station = station.name
 
-        ax.text(0.01, 0.96 + event_offset,
-                f'Event: {event.name} at {event.start_time.strftime("%H:%M")} - {event.end_time.strftime("%H:%M")} with {event.expected_ridership} estimated people and nearest station {event_station}',
-                transform=ax.transAxes)
+        ax.text(
+            0.01,
+            0.96 + event_offset,
+            f"Event: {event.name} at {event.start_time.strftime('%H:%M')} - {event.end_time.strftime('%H:%M')} with {event.expected_ridership} estimated people and nearest station {event_station}",
+            transform=ax.transAxes,
+        )
         event_offset += -0.1
 
     for delay in sim.delays:
-
         delay_station = ""
         for station in line.stations:
             if station.id == delay.nearest_station_id:
                 delay_station = station.name
 
-        ax.text(0.01, 0.96 + event_offset,
-                f'Delay: {delay.name} at {delay.start_time.strftime("%H:%M")} - {delay.end_time.strftime("%H:%M")}  and nearest station {delay_station}',
-                transform=ax.transAxes)
+        ax.text(
+            0.01,
+            0.96 + event_offset,
+            f"Delay: {delay.name} at {delay.start_time.strftime('%H:%M')} - {delay.end_time.strftime('%H:%M')}  and nearest station {delay_station}",
+            transform=ax.transAxes,
+        )
         event_offset += -0.1
-    
-    ax.text(0.01, 0.96, f'Line: {line.name}', transform=ax.transAxes)
-    
-    train_markers = [ax.plot(0, 0, 's', markersize=10, color='lightgreen')[0]
-                             for t in line.get_trains()]
-    train_psg = [ax.text(0, 0, f'{len(t.passengers)}', va='center', fontsize=9)
-                         for t in line.get_trains()]
 
-    station_n_psg_up = [ax.text(s.lon, s.lat+0.0015, get_waiting_text_up(s),
-                                va='center', fontsize=9, color="red")
-                                for s in line.get_stations()]
+    ax.text(0.01, 0.96, f"Line: {line.name}", transform=ax.transAxes)
 
-    station_n_psg_down = [ax.text(s.lon, s.lat-0.0015,
-                                  get_waiting_text_down(s),
-                                  va='center', fontsize=9, color="blue")
-                                  for s in line.get_stations()]
-    
-    station_names = [ax.text(s.lon+0.001, s.lat,
-                             f'{s.name}',
-                             va='center', fontsize=9, color="black")
-                             for s in line.get_stations()]
+    train_markers = [
+        ax.plot(0, 0, "s", markersize=10, color="lightgreen")[0]
+        for t in line.get_trains()
+    ]
+    train_psg = [
+        ax.text(0, 0, f"{len(t.passengers)}", va="center", fontsize=9)
+        for t in line.get_trains()
+    ]
+
+    station_n_psg_up = [
+        ax.text(
+            s.lon,
+            s.lat + 0.0015,
+            get_waiting_text_up(s),
+            va="center",
+            fontsize=9,
+            color="red",
+        )
+        for s in line.get_stations()
+    ]
+
+    station_n_psg_down = [
+        ax.text(
+            s.lon,
+            s.lat - 0.0015,
+            get_waiting_text_down(s),
+            va="center",
+            fontsize=9,
+            color="blue",
+        )
+        for s in line.get_stations()
+    ]
+
+    station_names = [
+        ax.text(
+            s.lon + 0.001, s.lat, f"{s.name}", va="center", fontsize=9, color="black"
+        )
+        for s in line.get_stations()
+    ]
 
     plt.tight_layout()
-
 
     # --- Update function ---
     def update(frames):
@@ -125,9 +156,10 @@ def animate_simulation_2d(sim: Simulation,
         # Add empty train markers if new train was added
         if len(train_markers) < len(line.get_trains()):
             new_t = line.get_trains()[-1]
-            train_markers.append(ax.plot(0, 0, 's', markersize=10)[0])
-            train_psg.append(ax.text(0, 0, f'{len(new_t.passengers)}', va='center',
-                                     fontsize=9))
+            train_markers.append(ax.plot(0, 0, "s", markersize=10)[0])
+            train_psg.append(
+                ax.text(0, 0, f"{len(new_t.passengers)}", va="center", fontsize=9)
+            )
 
         # Update train markers and text labels
         for i, train in enumerate(line.get_trains()):
@@ -139,8 +171,9 @@ def animate_simulation_2d(sim: Simulation,
             elif train.state == TrainState.EN_ROUTE:
                 # Interpolate position based on time elapsed since departure
                 time_since_departure = sim.current_time - train.previous_departure_time
-                travel_progress = min(1.0, time_since_departure.total_seconds() /
-                                      train.get_travel_time())
+                travel_progress = min(
+                    1.0, time_since_departure.total_seconds() / train.get_travel_time()
+                )
 
                 start_x = train.prev_station.lon
                 start_y = train.prev_station.lat
@@ -154,17 +187,17 @@ def animate_simulation_2d(sim: Simulation,
             if x_pos is not None:
                 train_markers[i].set_data([x_pos], [y_pos])
                 if train.is_broken:
-                    train_markers[i].set_color('brown')
+                    train_markers[i].set_color("brown")
                 elif train.pct_utilized >= 0.99:
-                    train_markers[i].set_color('yellow')
+                    train_markers[i].set_color("yellow")
                 elif train.direction == 1:
-                    train_markers[i].set_color('red')
+                    train_markers[i].set_color("red")
                 else:
-                    train_markers[i].set_color('blue')
-                train_psg[i].set_position((x_pos+0.0012, y_pos))
+                    train_markers[i].set_color("blue")
+                train_psg[i].set_position((x_pos + 0.0012, y_pos))
                 train_psg[i].set_text(f"{len(train.passengers)}")
                 updates.append(train_markers[i])
-                #updates.append(train_texts[i])
+                # updates.append(train_texts[i])
                 updates.append(train_psg[i])
 
         for i, station in enumerate(line.get_stations()):
@@ -174,17 +207,22 @@ def animate_simulation_2d(sim: Simulation,
             updates.append(station_n_psg_down[i])
 
         # Update time text
-        time_text.set_text(f'Time: {format_time(sim.current_time) }')  # Display time at end of step
+        time_text.set_text(
+            f"Time: {format_time(sim.current_time)}"
+        )  # Display time at end of step
         updates.append(time_text)
 
         return updates  # Return list of modified artists for blitting
 
     # --- Create and Run Animation ---
-    ani = animation.FuncAnimation(fig, update,
-                                  frames=duration_seconds,  # duration drives frame count
-                                  interval=animation_interval_ms,  # controls playback speed
-                                  blit=True,  # smoother animation
-                                  repeat=False)
+    ani = animation.FuncAnimation(
+        fig,
+        update,
+        frames=duration_seconds,  # duration drives frame count
+        interval=animation_interval_ms,  # controls playback speed
+        blit=True,  # smoother animation
+        repeat=False,
+    )
 
     # --- Save xor Show animation ---
     if save_video:
@@ -202,7 +240,9 @@ def animate_simulation_2d(sim: Simulation,
             print(f"Attempting to save animation to {output_filename_mp4}...")
             print(f"(Using writer='ffmpeg', fps={save_fps_video}, dpi={save_dpi})")
             # You might need to specify writer='ffmpeg_file' on some systems
-            ani.save(output_filename_mp4, writer='ffmpeg', fps=save_fps_video, dpi=save_dpi)
+            ani.save(
+                output_filename_mp4, writer="ffmpeg", fps=save_fps_video, dpi=save_dpi
+            )
             print(f"Successfully saved MP4: {output_filename_mp4}")
         except FileNotFoundError:
             print("\nERROR: 'ffmpeg' writer not found.")
@@ -211,7 +251,6 @@ def animate_simulation_2d(sim: Simulation,
         except Exception as e:
             print(f"\nERROR saving MP4: {e}\n")
     else:
-        ax.legend(loc='upper right')
+        ax.legend(loc="upper right")
         plt.tight_layout()
         plt.show()
-

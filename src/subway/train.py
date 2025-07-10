@@ -9,14 +9,14 @@ from src.utils import format_time
 
 
 class Train:
-
-    def __init__(self,
-                 train_id: int,
-                 stations_in_line: List[SubwayStation],
-                 direction: int,
-                 is_rotating_train: bool,
-                 capacity: int):
-
+    def __init__(
+        self,
+        train_id: int,
+        stations_in_line: List[SubwayStation],
+        direction: int,
+        is_rotating_train: bool,
+        capacity: int,
+    ):
         self.capacity = capacity
         self.id = train_id
         self.current_station: Optional[SubwayStation] = None
@@ -42,19 +42,24 @@ class Train:
         self.travel_time_to_next_station = 0
 
         # Time information
-        self.arrival_time = None  # int (total seconds) - relevant when state == EN_ROUTE
-        self.ready_to_depart_at = None  # int (total seconds) - relevant when state == AT_STATION
+        self.arrival_time = (
+            None  # int (total seconds) - relevant when state == EN_ROUTE
+        )
+        self.ready_to_depart_at = (
+            None  # int (total seconds) - relevant when state == AT_STATION
+        )
         self.previous_departure_time = None
 
         self.is_broken = False
 
     def __repr__(self):
         return f"Train {self.id}"
-    
-    def update(self,
-               current_time: datetime,
-               station_travel_times: Dict[SubwayStation, Dict[int, int]]) -> List[float]:
-        
+
+    def update(
+        self,
+        current_time: datetime,
+        station_travel_times: Dict[SubwayStation, Dict[int, int]],
+    ) -> List[float]:
         if self.is_broken:
             travel_times = self._update_broken(current_time, station_travel_times)
         else:
@@ -62,16 +67,22 @@ class Train:
 
         return travel_times
 
-    def _update_regular(self,
-                    current_time: datetime,
-                    station_travel_times: Dict[SubwayStation, Dict[int, int]]) -> List[float]:
+    def _update_regular(
+        self,
+        current_time: datetime,
+        station_travel_times: Dict[SubwayStation, Dict[int, int]],
+    ) -> List[float]:
         travel_times = []
 
         # Train is currently at a station
         if self.state == TrainState.AT_STATION:
             if self.ready_to_depart_at is None:  # Train just arrived / was deployed
-
-                self.ready_to_depart_at = current_time + timedelta(seconds=max(DWELL_TIME_AT_STATION, round(len(self.current_station.waiting_passengers)/10)))
+                self.ready_to_depart_at = current_time + timedelta(
+                    seconds=max(
+                        DWELL_TIME_AT_STATION,
+                        round(len(self.current_station.waiting_passengers) / 10),
+                    )
+                )
 
                 self.remaining_destinations = self.remaining_destinations[1:]
                 self.next_station = self.remaining_destinations[0]
@@ -79,7 +90,10 @@ class Train:
                 # Passengers leave and enter
                 travel_times = self._psg_exchange(current_time)
 
-            if current_time >= self.ready_to_depart_at and self.check_station_free() == True:  # Depart towards the next station
+            if (
+                current_time >= self.ready_to_depart_at
+                and self.check_station_free() == True
+            ):  # Depart towards the next station
                 if self.direction == 1:
                     if self.next_station.is_end:
                         self.next_station.train_incoming_down()
@@ -95,8 +109,8 @@ class Train:
 
                 travel_time = station_travel_times[self.next_station][self.direction]
 
-                #print(f"{format_time(current_time)} - {self} departing from {self.current_station} "
-                      #f"towards {self.next_station} taking {travel_time} seconds")
+                # print(f"{format_time(current_time)} - {self} departing from {self.current_station} "
+                # f"towards {self.next_station} taking {travel_time} seconds")
                 self.state = TrainState.EN_ROUTE
                 self.travel_time_to_next_station = travel_time
 
@@ -109,9 +123,8 @@ class Train:
 
         # Train is currently traveling to the next station
         if self.state == TrainState.EN_ROUTE:
-
             if current_time >= self.arrival_time:  # Train arrived at a station
-                #print(f"{format_time(current_time)} - {self} arrived at {self.next_station}")
+                # print(f"{format_time(current_time)} - {self} arrived at {self.next_station}")
                 self.current_station = self.next_station
                 self.next_station = None
                 self.state = TrainState.AT_STATION
@@ -119,10 +132,12 @@ class Train:
 
                 # Reverse directions if rotating train
                 if self.current_station.is_end and self.is_rotating_train:
-                    #print(f"{format_time(current_time)} - {self} arrived at end station, reversing direction.")
-                    self.direction *=-1
+                    # print(f"{format_time(current_time)} - {self} arrived at end station, reversing direction.")
+                    self.direction *= -1
                     if self.direction == -1:
-                        self.remaining_destinations = list(reversed(self.stations_in_line))
+                        self.remaining_destinations = list(
+                            reversed(self.stations_in_line)
+                        )
                     else:
                         self.remaining_destinations = self.stations_in_line
                 elif self.current_station.is_end:
@@ -130,16 +145,20 @@ class Train:
                     self.finished_tour = True
 
         return travel_times
-    
-    def _update_broken(self,
-                        current_time: datetime,
-                        station_travel_times: Dict[SubwayStation, Dict[int, int]]) -> None:
+
+    def _update_broken(
+        self,
+        current_time: datetime,
+        station_travel_times: Dict[SubwayStation, Dict[int, int]],
+    ) -> None:
         travel_times = []
-        
+
         if self.state == TrainState.AT_STATION:
             if self.passengers:
                 travel_times = self._disembark_all(current_time)
-                self.ready_to_depart_at = current_time + timedelta(seconds=DWELL_TIME_AT_STATION)
+                self.ready_to_depart_at = current_time + timedelta(
+                    seconds=DWELL_TIME_AT_STATION
+                )
             else:
                 self.ready_to_depart_at = current_time
             self.remaining_destinations = self.remaining_destinations[1:]
@@ -148,8 +167,11 @@ class Train:
             except IndexError:
                 print("Warning: forcing the finish of a train due to index error")
                 self.finished_tour = True
-            
-            if current_time >= self.ready_to_depart_at and self.check_station_free() == True:  # Depart towards the next station
+
+            if (
+                current_time >= self.ready_to_depart_at
+                and self.check_station_free() == True
+            ):  # Depart towards the next station
                 if self.direction == 1:
                     if self.next_station.is_end:
                         self.next_station.train_incoming_down()
@@ -165,8 +187,8 @@ class Train:
 
                 travel_time = station_travel_times[self.next_station][self.direction]
 
-                #print(f"{format_time(current_time)} - {self} departing from {self.current_station} "
-                      #f"towards {self.next_station} taking {travel_time} seconds")
+                # print(f"{format_time(current_time)} - {self} departing from {self.current_station} "
+                # f"towards {self.next_station} taking {travel_time} seconds")
                 self.state = TrainState.EN_ROUTE
                 self.travel_time_to_next_station = travel_time
 
@@ -179,9 +201,8 @@ class Train:
 
                 # Train is currently traveling to the next station
         if self.state == TrainState.EN_ROUTE:
-
             if current_time >= self.arrival_time:  # Train arrived at a station
-                #print(f"{format_time(current_time)} - {self} arrived at {self.next_station}")
+                # print(f"{format_time(current_time)} - {self} arrived at {self.next_station}")
                 self.current_station = self.next_station
                 self.next_station = None
                 self.state = TrainState.AT_STATION
@@ -189,10 +210,12 @@ class Train:
 
                 # Reverse directions if rotating train
                 if self.current_station.is_end and self.is_rotating_train:
-                    #print(f"{format_time(current_time)} - {self} arrived at end station, reversing direction.")
-                    self.direction *=-1
+                    # print(f"{format_time(current_time)} - {self} arrived at end station, reversing direction.")
+                    self.direction *= -1
                     if self.direction == -1:
-                        self.remaining_destinations = list(reversed(self.stations_in_line))
+                        self.remaining_destinations = list(
+                            reversed(self.stations_in_line)
+                        )
                     else:
                         self.remaining_destinations = self.stations_in_line
                 elif self.current_station.is_end:
@@ -202,12 +225,13 @@ class Train:
         return travel_times
 
     def _psg_exchange(self, current_time: datetime) -> List[float]:
-
         # --- Disembarking ---
         travel_times = self._disembark_arriving_passengers(current_time)
 
         # --- Embarking ---
-        entering_passengers = self.current_station.get_waiting_psg_for_train([station.id for station in self.remaining_destinations])
+        entering_passengers = self.current_station.get_waiting_psg_for_train(
+            [station.id for station in self.remaining_destinations]
+        )
         if len(self.passengers) + len(entering_passengers) > self.capacity:
             remaining_capacity = self.capacity - len(self.passengers)
             entering_passengers = random.sample(entering_passengers, remaining_capacity)
@@ -230,19 +254,22 @@ class Train:
 
         return travel_times
 
-    def _disembark_arriving_passengers(self,
-                                       current_time: datetime) -> List[float]:
-
+    def _disembark_arriving_passengers(self, current_time: datetime) -> List[float]:
         # Count all travel times of disembarking passengers
         travel_times = []
         for passenger in self.passengers:
             if passenger.leave_id == self.current_station.id:
-                minutes_difference = (current_time - passenger.spawn_time).total_seconds() / 60
+                minutes_difference = (
+                    current_time - passenger.spawn_time
+                ).total_seconds() / 60
                 travel_times.append(minutes_difference)
 
         # Remove all disembarking passengers
-        self.passengers = [passenger for passenger in self.passengers
-                           if passenger.leave_id != self.current_station.id]
+        self.passengers = [
+            passenger
+            for passenger in self.passengers
+            if passenger.leave_id != self.current_station.id
+        ]
 
         return travel_times
 
@@ -256,14 +283,18 @@ class Train:
 
     def check_station_free(self):
         if self.direction == 1:
-            return self.next_station.get_occupation_up() == False and self.current_station.get_delay_up() == False
+            return (
+                self.next_station.get_occupation_up() == False
+                and self.current_station.get_delay_up() == False
+            )
         else:
-            return self.next_station.get_occupation_down() == False and self.current_station.get_delay_down() == False
+            return (
+                self.next_station.get_occupation_down() == False
+                and self.current_station.get_delay_down() == False
+            )
 
     def has_finished_tour(self):
         return self.finished_tour
 
     def get_travel_time(self):
         return self.travel_time_to_next_station
-
-
