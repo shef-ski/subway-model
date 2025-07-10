@@ -5,24 +5,43 @@
 An agent-based model for simulating subway lines.
 
 
+
 ## Setup
 
-### Create environment
+Please use ``Python >3.12`` or a newer version.
 
-Use Python 3.12 or a similar version. Create a virtual environment using ``python -m venv venv``, activate it (Windows: ``venv\Scripts\activate`` , Linux/macOS: ``source venv/bin/activate``) and use ``pip install -r requirements.txt`` to install the necessary packages into the venv.
+We recommend to use ``uv`` package manager to manage dependencies and the virtual environment for this project. After ensuring Python and ``uv`` are installed on your system, proceed with the Automated or Manual Setup options to install and run simulations.
 
-Alternatively, us ``uv`` to manage dependencies instead of venv. Ensure uv is installed on your system. Then, then create a uv venv using ``uv venv``, activate it using `.venv\Scripts\activate` and install packages from the pyproject.toml using ``uv sync``. New packages are added using ``uv add libraryname``. 
 
-### Running simulations
+### Automated Setup
+
+#### Create environment
+
+Simply run the ``setup.sh`` (Linux, MacOS) or ``setup.bat`` (Windows) to install the environment. 
+
+#### Running simulations
+
+Simply run the ``run.sh`` or ``run.bat`` to start a simulation. You can set different parameters at the top of the ``src/main.py`` file.
+
+
+### Manual Setup
+
+#### Create environment
+
+First, create a uv venv using ``uv venv``, activate it using `.venv\Scripts\activate` and install packages from the pyproject.toml using ``uv sync``. Optional: Any new packages are added using ``uv add libraryname``. 
+
+
+#### Running simulations
 
 To start a simulation, run the main.py.
 
 From repo root
+
 ```
 python -m src.main
 ```
 
-### Saving simulations (optional)
+## Saving simulations (optional)
 
 To save a simulation run as .mp4, you need to install ffmpeg and imagemagick on your machine.
 
@@ -32,4 +51,6 @@ How it worked on Leon's Windows PC:
 - Install ffmpeg and imagemagick using ``choco install ffmpeg imagemagick -y``
 - Restart PC
 
+
+Then, ensure ``SAVE_VIDEO`` is set to `True` in the ``src/main.py`` file.
 
