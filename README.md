@@ -4,7 +4,7 @@
 
 An agent-based model for simulating subway lines.
 
-
+You can see recordings of various simulation runs in the ``recordings/`` directory.
 
 ## Setup
 
