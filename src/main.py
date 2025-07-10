@@ -11,7 +11,7 @@ from src.subway.delay.delay import Delay
 from src.subway.generic_subway.generic_subway_line import GenericSubwayLine
 
 # --- Constants ---
-SEED = 12345
+SEED = 1234
 random.seed(SEED)
 
 ADD_BREAKING_TIMES = False
@@ -20,7 +20,7 @@ ADD_DELAY = False
 
 SIM_START_TIME = datetime(2025, 1, 6, 8, 0)
 
-SIMULATION_DURATION_SECONDS = 180  # = 4h
+SIMULATION_DURATION_SECONDS = 2000
 ANIMATION_INTERVAL_MS = 2  # Visualization speed
 ANIMATE_2D = True
 SAVE_VIDEO = False
@@ -49,14 +49,14 @@ if ADD_BREAKING_TIMES:
 
 # OPTIONAL: Create basic event which temporarily increases ridership
 if ADD_EVENTS:
-    event_start_time = SIM_START_TIME + timedelta(minutes=120)
+    event_start_time = SIM_START_TIME + timedelta(minutes=45)
     event_end_time = event_start_time + timedelta(hours=1)
-    event = Event("show", 5, 3000, event_start_time, event_end_time)
+    event = Event("show", 5, 4000, event_start_time, event_end_time)
     sim.add_events([event])
 
 # OPTIONAL: Create delay
 if ADD_DELAY:
-    delay_start_time = SIM_START_TIME + timedelta(minutes=210)
+    delay_start_time = SIM_START_TIME + timedelta(minutes=10)
     delay_end_time = delay_start_time + timedelta(minutes=10)
     delay = Delay("coffee", 5, delay_start_time, delay_end_time)
     sim.add_delays([delay])

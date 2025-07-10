@@ -31,7 +31,7 @@ class GenericSubwayLine(AbstractSubwayLine, ABC):
 
         super().__init__(name, stations, cap)
 
-    def sample_arriving_passengers(self, station: SubwayStation, current_time: datetime, events: List[Event]) -> List[SubwayPassenger]:
+    def sample_arriving_passengers(self, station: SubwayStation, events: List[Event]) -> List[SubwayPassenger]:
         passengers = []
 
         if events is not None:
