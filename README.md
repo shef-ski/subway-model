@@ -15,13 +15,16 @@ We recommend to use ``uv`` package manager to manage dependencies and the virtua
 
 ### Automated Setup
 
+This (currently) only works on Windows.
+
 #### Create environment
 
-Simply run the ``setup.sh`` (Linux, MacOS) or ``setup.bat`` (Windows) to install the environment. 
+Simply run the ``setup.bat`` (Windows) to install the environment. 
 
 #### Running simulations
 
-Simply run the ``run.sh`` or ``run.bat`` to start a simulation. You can set different parameters at the top of the ``src/main.py`` file.
+Run the ``run.sh`` or ``run.bat`` to start a simulation.
+You can set different parameters at the top of the ``src/main.py`` file.
 
 
 ### Manual Setup
