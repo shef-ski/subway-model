@@ -19,11 +19,11 @@ This (currently) only works on Windows.
 
 #### Create environment
 
-Simply run the ``setup.bat`` (Windows) to install the environment. 
+Simply run the ``setup.bat``to install the environment. 
 
 #### Running simulations
 
-Run the ``run.sh`` or ``run.bat`` to start a simulation.
+Run the ``run.bat`` to start a simulation.
 You can set different parameters at the top of the ``src/main.py`` file.
 
 
